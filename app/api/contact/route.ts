@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 
 import { contactSchema, fieldErrorsFrom, type ContactResponse } from '@/lib/contactSchema';
 import {
@@ -8,6 +7,7 @@ import {
   notificationHtml,
   notificationText,
 } from '@/lib/emailTemplate';
+import { mailerName, sendMail } from '@/lib/mailer';
 
 /* This route sends email, so it must never be statically optimised or cached. */
 export const dynamic = 'force-dynamic';
@@ -62,6 +62,9 @@ function json(body: ContactResponse, status: number) {
 /** Minimum time on the form before a submission is believable. */
 const MIN_ELAPSED_MS = 3000;
 
+/** Shown to the browser for any send failure. Deliberately says nothing. */
+const GENERIC_SEND_ERROR = 'We could not send that just now. Please try again.';
+
 export async function POST(request: Request) {
   // --- Rate limit ---------------------------------------------------------
   if (isRateLimited(clientIp(request))) {
@@ -106,93 +109,43 @@ export async function POST(request: Request) {
   }
 
   // --- Config -------------------------------------------------------------
-  const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_TO_EMAIL;
-  const from = process.env.CONTACT_FROM_EMAIL;
-
-  if (!apiKey || !to || !from) {
-    // The real reason is logged server-side only; the client gets a generic
-    // message so misconfiguration never leaks into a response body.
-    console.error(
-      '[contact] Missing env:',
-      [!apiKey && 'RESEND_API_KEY', !to && 'CONTACT_TO_EMAIL', !from && 'CONTACT_FROM_EMAIL']
-        .filter(Boolean)
-        .join(', '),
-    );
-    return json({ ok: false, error: 'We could not send that just now. Please try again.' }, 500);
+  if (!to) {
+    // Logged server-side only; misconfiguration never leaks to the client.
+    console.error('[contact] CONTACT_TO_EMAIL is not set.');
+    return json({ ok: false, error: GENERIC_SEND_ERROR }, 500);
   }
 
   const submittedAt = new Date();
   const subject = `New enquiry — ${data.name}${data.company ? `, ${data.company}` : ''}`;
 
-  try {
-    const resend = new Resend(apiKey);
+  // --- Notification to IntelSol. replyTo means hitting Reply answers the
+  //     lead directly rather than ourselves. -------------------------------
+  const notification = await sendMail({
+    to,
+    replyTo: data.email,
+    subject,
+    html: notificationHtml(data, submittedAt),
+    text: notificationText(data, submittedAt),
+  });
 
-    // --- Notification to IntelSol. replyTo means hitting Reply in Gmail
-    //     answers the lead directly. ----------------------------------------
-    const notification = await resend.emails.send({
-      from: `IntelSol AI <${from}>`,
-      to: [to],
-      replyTo: data.email,
-      subject,
-      html: notificationHtml(data, submittedAt),
-      text: notificationText(data, submittedAt),
-    });
-
-    if (notification.error) {
-      console.error('[contact] Resend notification failed:', notification.error);
-      return json({ ok: false, error: 'We could not send that just now. Please try again.' }, 500);
-    }
-
-    // --- Auto-reply to the submitter. A failure here must NOT fail the
-    //     request: the enquiry already landed, which is what matters. -------
-    try {
-      const reply = await resend.emails.send({
-        from: `IntelSol AI <${from}>`,
-        to: [data.email],
-        subject: 'Thanks — we got your message',
-        html: autoReplyHtml(data.name),
-        text: autoReplyText(data.name),
-      });
-      if (reply.error) console.error('[contact] Auto-reply failed:', reply.error);
-    } catch (error) {
-      console.error('[contact] Auto-reply threw:', error);
-    }
-
-    return json({ ok: true }, 200);
-  } catch (error) {
-    console.error('[contact] Send threw:', error);
-    return json({ ok: false, error: 'We could not send that just now. Please try again.' }, 500);
+  if (!notification.ok) {
+    console.error(`[contact] Notification failed via ${mailerName()}:`, notification.reason);
+    return json({ ok: false, error: GENERIC_SEND_ERROR }, 500);
   }
+
+  // --- Auto-reply to the submitter. A failure here must NOT fail the
+  //     request: the enquiry already landed, which is what matters. --------
+  const autoReply = await sendMail({
+    to: data.email,
+    subject: 'Thanks — we got your message',
+    html: autoReplyHtml(data.name),
+    text: autoReplyText(data.name),
+  });
+
+  if (!autoReply.ok) {
+    console.error(`[contact] Auto-reply failed via ${mailerName()}:`, autoReply.reason);
+  }
+
+  return json({ ok: true }, 200);
 }
-
-/* ---------------------------------------------------------------------------
-   SMTP alternative (Nodemailer)
-   ---------------------------------------------------------------------------
-   Ready to swap in if you would rather use your own SMTP server than Resend.
-   Install `nodemailer` and `@types/nodemailer`, add the env vars below, then
-   replace the `resend.emails.send(...)` calls above with `transport.sendMail`.
-
-   SMTP_HOST=smtp.yourhost.com
-   SMTP_PORT=587
-   SMTP_USER=
-   SMTP_PASS=
-
-   import nodemailer from 'nodemailer';
-
-   const transport = nodemailer.createTransport({
-     host: process.env.SMTP_HOST,
-     port: Number(process.env.SMTP_PORT ?? 587),
-     secure: Number(process.env.SMTP_PORT) === 465,
-     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-   });
-
-   await transport.sendMail({
-     from: `IntelSol AI <${from}>`,
-     to,
-     replyTo: data.email,
-     subject,
-     html: notificationHtml(data, submittedAt),
-     text: notificationText(data, submittedAt),
-   });
---------------------------------------------------------------------------- */

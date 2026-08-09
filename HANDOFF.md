@@ -9,33 +9,73 @@ Ordered by how much it matters.
 
 ### 1.1 Email delivery is not wired up
 
-The contact form is fully built and every code path is tested, but **no email has
-actually been sent** because there is no Resend API key in this environment.
+The contact form is fully built and every code path is tested against a real
+SMTP server, but **no mail is sent until you configure a provider.**
 
-To finish it:
+The app supports two, chosen automatically by environment variable
+(`lib/mailer.ts`). Nothing else in the codebase knows which is active, so
+switching later is an env change, not a code change.
+
+| | SMTP (Nodemailer) | Resend |
+| --- | --- | --- |
+| Setup time | ~5 minutes | Hours to days (DNS propagation) |
+| Needs verified domain | No | **Yes** |
+| Sending limit | Gmail: ~500/day | 3,000/month free |
+| Speed on serverless | ~1–3s (SMTP handshake) | ~200ms (HTTP API) |
+| `From` address | Gmail rewrites it to your own address | Any address on your domain |
+| Deliverability | Fine to your own inbox; auto-replies more likely to hit spam | Dashboard, logs, better inbox placement |
+
+**Selection rule:** if `SMTP_HOST` + `SMTP_USER` + `SMTP_PASS` are all set, SMTP
+is used. Otherwise `RESEND_API_KEY` is used. If neither is present the form
+returns a generic error and logs the reason server-side.
+
+#### Option A — Gmail SMTP (fastest way to go live)
+
+1. Enable **2-Step Verification** on the Google account.
+2. Create an App Password at https://myaccount.google.com/apppasswords
+3. Set:
+
+```
+CONTACT_TO_EMAIL=ak1107842@gmail.com
+CONTACT_FROM_EMAIL=ak1107842@gmail.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=ak1107842@gmail.com
+SMTP_PASS=<the 16-character App Password>
+NEXT_PUBLIC_CONTACT_EMAIL=hello@intelsolai.com
+NEXT_PUBLIC_SITE_URL=https://intelsolai.com
+```
+
+**Use the App Password, not your Google password** — Google rejects the latter
+over SMTP.
+
+**Set `CONTACT_FROM_EMAIL` to the same Gmail address.** Gmail rewrites the
+`From` header to whichever account authenticated, so setting it to
+`website@intelsolai.com` will not stick unless you have added that as a
+verified "Send mail as" alias in Gmail → Settings → Accounts. The practical
+consequence is that the auto-reply your leads receive arrives from a personal
+Gmail address, which reads as less credible on a vendor site. That is the main
+reason to move to Option B once DNS is sorted.
+
+#### Option B — Resend (better long-term)
 
 1. Create an account at [resend.com](https://resend.com) and generate an API key.
-2. Add `intelsolai.com` as a domain in the Resend dashboard.
-3. Publish the **SPF, DKIM and DMARC** records Resend gives you at your DNS host.
-   Wait for Resend to show the domain as Verified — this usually takes minutes but
-   can take up to 48 hours.
-4. Set these environment variables (in Vercel: Project → Settings → Environment
-   Variables):
+2. Add `intelsolai.com` as a domain there.
+3. Publish the **SPF, DKIM and DMARC** records it gives you at your DNS host and
+   wait for the domain to show as Verified.
+4. Set `RESEND_API_KEY` and `CONTACT_FROM_EMAIL=website@intelsolai.com`, and
+   **remove the `SMTP_*` variables** (SMTP takes priority when present).
 
-   ```
-   RESEND_API_KEY=re_xxxxxxxxxxxx
-   CONTACT_TO_EMAIL=ak1107842@gmail.com
-   CONTACT_FROM_EMAIL=website@intelsolai.com
-   NEXT_PUBLIC_CONTACT_EMAIL=hello@intelsolai.com
-   NEXT_PUBLIC_SITE_URL=https://intelsolai.com
-   ```
+For local testing before the domain verifies, `onboarding@resend.dev` works as
+the `From`. It will not work in production.
 
-5. Submit the form once and confirm the enquiry lands in `ak1107842@gmail.com`,
-   and that pressing **Reply** in Gmail addresses the submitter, not yourself.
+#### Verify it either way
 
-**Important:** Resend will not send from a Gmail address. `CONTACT_FROM_EMAIL`
-must be on a domain you have verified. Until `intelsolai.com` is verified, use
-`onboarding@resend.dev` for local testing only — it will not work in production.
+Submit the form once and confirm:
+
+- the enquiry lands in `CONTACT_TO_EMAIL`
+- pressing **Reply** addresses the submitter, not yourself
+- the submitter receives the auto-reply
 
 `CONTACT_TO_EMAIL` is read server-side only. It is not in any committed file and
 does not appear anywhere in the client bundle (verified — see §5).
@@ -104,6 +144,7 @@ Once the real videos exist, update `uploadDate` in `lib/content.ts` so the
 | **Public email** | The page shows `hello@intelsolai.com`. Enquiries still route to your Gmail. | `NEXT_PUBLIC_CONTACT_EMAIL` |
 | **LinkedIn URL** | Guessed `linkedin.com/company/intelsolai`. **Verify this resolves.** | `site.linkedin` in `lib/content.ts` |
 | **Pulse animation** | Used CSS `offset-path` instead of SVG `<animateMotion>`. SMIL runs on the main thread; ten animated paths above the fold would have cost the mobile performance target. | `components/svg/OrbitGraphic.tsx` |
+| **Mail provider** | Made it switchable rather than Resend-only, so Gmail SMTP works today without DNS. | `lib/mailer.ts`, env vars |
 | **OG image** | Generated at build time by `next/og` (`app/opengraph-image.tsx`) rather than a static PNG, so it stays in sync with the brand tokens. | Edit that file, or drop in a static PNG |
 
 ---
@@ -184,6 +225,12 @@ moving the contact endpoint to a standalone serverless function.
   honeypot, 200 silent timing rejection, 429 rate limit on the 4th request, 400
   malformed JSON, 500 misconfiguration. The real failure reason is logged
   server-side only and never appears in a response body.
+- **Mail delivery, against a real SMTP server**: notification and auto-reply both
+  delivered, `Reply-To` correctly set to the submitter. Bad credentials produce a
+  generic 500 with the real reason logged privately. When the auto-reply bounces
+  but the notification succeeds, the visitor still sees success — the enquiry
+  landed, which is what matters. Provider selection verified for all three cases:
+  SMTP only, Resend only, and both set (SMTP wins).
 - **Recipient address absent from the entire build output** —
   `grep -r "ak1107842" .next/` returns nothing.
 - **Keyboard**: skip link is first focusable; 90 tab stops with no trap; tab strip

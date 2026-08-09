@@ -10,7 +10,7 @@ real assets or configuration before launch.
 - Next.js 15 (App Router) + TypeScript strict
 - Tailwind CSS v4, tokens defined in `@theme` in `app/globals.css`
 - `next/font/google` — Bricolage Grotesque, Public Sans, JetBrains Mono, self-hosted
-- Zod + Resend — the only two runtime dependencies
+- Zod for validation; Nodemailer **or** Resend for email, selected by env var
 - No UI library, no animation library, no icon package. Every icon and
   illustration is hand-authored inline SVG.
 
