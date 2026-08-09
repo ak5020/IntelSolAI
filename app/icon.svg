@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="IntelSol AI">
+  <title>IntelSol AI</title>
+  <rect width="24" height="24" rx="6.5" fill="#3FDCC0"/>
+  <g stroke="#07090C" stroke-width="1.6" stroke-linecap="round">
+    <path d="M10.15 12H8.35"/>
+    <path d="M13.5 10.85l2.6-1.55"/>
+    <path d="M13.5 13.15l2.6 1.55"/>
+  </g>
+  <g fill="#07090C">
+    <circle cx="6.6" cy="12" r="1.85"/>
+    <circle cx="11.9" cy="12" r="2.05"/>
+    <circle cx="17.6" cy="8.5" r="1.85"/>
+    <circle cx="17.6" cy="15.5" r="1.85"/>
+  </g>
+</svg>

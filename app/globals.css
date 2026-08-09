@@ -1,0 +1,475 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   IntelSol AI — design tokens
+   ---------------------------------------------------------------------------
+   Everything visual is defined once, here. Sections never invent colours,
+   spacing or radii of their own. Tailwind v4 reads this @theme block and
+   generates the matching utilities (bg-bg, text-body, border-line, etc.).
+   =========================================================================== */
+
+@theme {
+  /* --- Surfaces: near-black with a slight navy cast, echoing the logo ------ */
+  --color-bg: #07090c;
+  --color-bg-elev: #0d1014;
+  --color-bg-elev-2: #13171c;
+
+  /* --- Lines: depth comes from hairlines, not shadows --------------------- */
+  --color-line: #1b2027;
+  --color-line-strong: #2a313a;
+
+  /* --- Text --------------------------------------------------------------- */
+  --color-text: #f2f5f7;
+  --color-body: #b4bcc5; /* 9.8:1 on --color-bg-elev */
+  --color-muted: #79838e; /* 4.93:1 on --color-bg-elev — AA for body text */
+
+  /* --- Accent: the logo mint. Used ONLY on primary CTAs, active states
+         and live data points. Never on decorative chrome. ------------------ */
+  --color-accent: #3fdcc0;
+  --color-accent-soft: rgb(63 220 192 / 0.1);
+  --color-accent-ink: #07090c; /* text ON accent — 11.6:1 */
+
+  /* --- Signal: data-visualisation only, never UI chrome ------------------- */
+  --color-signal: #e7b84b;
+
+  /* --- Typography (wired to next/font in app/layout.tsx) ------------------ */
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* --- Radii: 12 cards / 8 buttons / 4 badges. Never mixed arbitrarily ---- */
+  --radius-card: 12px;
+  --radius-btn: 8px;
+  --radius-badge: 4px;
+
+  /* --- Motion ------------------------------------------------------------- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  /* Vertical rhythm. Defined ONCE and never overridden per section — this is
+     the single biggest source of inconsistent spacing on pages like this. */
+  --section-y: clamp(88px, 12vh, 160px);
+  --maxw: 1240px;
+  --gutter: 24px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 48px;
+  }
+}
+
+/* ===========================================================================
+   Base
+   =========================================================================== */
+
+* {
+  min-width: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Anchor targets clear the fixed header instead of hiding behind it. */
+  scroll-padding-top: 88px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Locked while the mobile nav overlay is open. */
+body[data-scroll-locked='true'] {
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--color-text);
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.75rem, 6.5vw, 5.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+/* ===========================================================================
+   Focus — visible on every interactive element, always.
+   =========================================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Only remove the ring for pointer users who never needed it. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===========================================================================
+   Utilities used across sections
+   =========================================================================== */
+
+/* Page shell: max width + responsive gutters. */
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Mono eyebrow / label treatment. */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Skip link — first focusable element, visible only when focused. */
+.skip-link {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -120%);
+  z-index: 100;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 var(--radius-btn) var(--radius-btn);
+  font-weight: 600;
+  transition: transform 150ms var(--ease-out-expo);
+}
+
+.skip-link:focus {
+  transform: translate(-50%, 0);
+}
+
+/* Fixed 1px noise overlay at ~3% — pure CSS, no image request. */
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 0.6) 0 1px,
+      transparent 1px 2px
+    ),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.35) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+
+/* ===========================================================================
+   Reveal-on-scroll
+   ---------------------------------------------------------------------------
+   Elements start hidden ONLY when JS confirms it can animate them, by setting
+   data-reveal-ready on <html>. Without JS the content renders in its final
+   state, so the page is never gated behind an observer that may not run.
+   =========================================================================== */
+
+html[data-reveal-ready='true'] [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+html[data-reveal-ready='true'] [data-reveal][data-revealed='true'] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 500ms var(--ease-out-expo),
+    transform 500ms var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* ===========================================================================
+   Keyframes
+   =========================================================================== */
+
+/* Marquee: one duplicated track translated by exactly half its width. */
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Hero node breathing. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Data pulses travelling a connector path (CSS offset-path, not SMIL —
+   declarative, cheap, and switched off by one media query below). */
+@keyframes pulse-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+/* Stroke draw-on for plot lines and process connectors. */
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tab panel crossfade. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ===========================================================================
+   Reduced motion — not optional.
+   Every transform, marquee, counter and pulse renders in its final state.
+   =========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Reveals resolve immediately rather than staying invisible. */
+  html[data-reveal-ready='true'] [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Pulses park mid-path instead of travelling. */
+  [data-pulse] {
+    offset-distance: 60% !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ===========================================================================
+   Accordion (S11)
+   ---------------------------------------------------------------------------
+   Panels default to OPEN. They only collapse once JS has confirmed it can
+   drive them (data-reveal-ready), so with JavaScript disabled every answer is
+   fully readable rather than trapped behind a button that does nothing.
+   =========================================================================== */
+
+.acc-panel {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.acc-panel > div {
+  overflow: hidden;
+}
+
+html[data-reveal-ready='true'] .acc-panel {
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms var(--ease-out-expo);
+}
+
+html[data-reveal-ready='true'] .acc-panel[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+
+/* ===========================================================================
+   Marquee track (S3)
+   =========================================================================== */
+
+.marquee {
+  /* Edge fade via mask, not overlay divs. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation-duration: 40s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ===========================================================================
+   Below-the-fold sections skip layout/paint until near the viewport.
+   contain-intrinsic-size is required — without it this causes scrollbar jump
+   and breaks anchor scrolling.
+   =========================================================================== */
+
+.defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
+
+/* ===========================================================================
+   Hero load-in (S2)
+   ---------------------------------------------------------------------------
+   A pure CSS stagger — no hydration, no observer. `both` fill keeps elements
+   hidden through their delay, and the reduced-motion block above collapses
+   the duration so content appears instantly instead of fading.
+   =========================================================================== */
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-in {
+  animation: hero-in 500ms var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ===========================================================================
+   Tabs (S8)
+   ---------------------------------------------------------------------------
+   Same principle as the accordion: without JS the tab strip is hidden and all
+   four panels render stacked, so every use case is readable. Once JS is ready
+   the strip appears and inactive panels collapse.
+   =========================================================================== */
+
+.tablist {
+  display: none;
+}
+
+html[data-reveal-ready='true'] .tablist {
+  display: flex;
+}
+
+html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
+  display: none;
+}
+
+.tab-panel[data-active='true'] {
+  animation: panel-in 220ms var(--ease-out-expo) both;
+}
+
+/* Moving dash along the active flow connector. */
+@keyframes dash-move {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-panel[data-active='true'] {
+    animation: none;
+  }
+}

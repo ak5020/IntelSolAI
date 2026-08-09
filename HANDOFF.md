@@ -1,0 +1,237 @@
+# IntelSol AI — Handoff
+
+Everything you need to supply, replace, or configure before this page goes live.
+Ordered by how much it matters.
+
+---
+
+## 1. Blockers — the site is not launch-ready until these are done
+
+### 1.1 Email delivery is not wired up
+
+The contact form is fully built and every code path is tested, but **no email has
+actually been sent** because there is no Resend API key in this environment.
+
+To finish it:
+
+1. Create an account at [resend.com](https://resend.com) and generate an API key.
+2. Add `intelsolai.com` as a domain in the Resend dashboard.
+3. Publish the **SPF, DKIM and DMARC** records Resend gives you at your DNS host.
+   Wait for Resend to show the domain as Verified — this usually takes minutes but
+   can take up to 48 hours.
+4. Set these environment variables (in Vercel: Project → Settings → Environment
+   Variables):
+
+   ```
+   RESEND_API_KEY=re_xxxxxxxxxxxx
+   CONTACT_TO_EMAIL=ak1107842@gmail.com
+   CONTACT_FROM_EMAIL=website@intelsolai.com
+   NEXT_PUBLIC_CONTACT_EMAIL=hello@intelsolai.com
+   NEXT_PUBLIC_SITE_URL=https://intelsolai.com
+   ```
+
+5. Submit the form once and confirm the enquiry lands in `ak1107842@gmail.com`,
+   and that pressing **Reply** in Gmail addresses the submitter, not yourself.
+
+**Important:** Resend will not send from a Gmail address. `CONTACT_FROM_EMAIL`
+must be on a domain you have verified. Until `intelsolai.com` is verified, use
+`onboarding@resend.dev` for local testing only — it will not work in production.
+
+`CONTACT_TO_EMAIL` is read server-side only. It is not in any committed file and
+does not appear anywhere in the client bundle (verified — see §5).
+
+### 1.2 Statistics are placeholders, not measured results
+
+You asked for "generic but realistic" figures, so S5 currently ships:
+
+| Figure  | Label                                   |
+| ------- | --------------------------------------- |
+| `60%`   | Reduction in manual follow-up time      |
+| `3x`    | Increase in qualified leads per rep     |
+| `24/7`  | Coverage across voice, chat and WhatsApp |
+| `2 min` | Average response time after automation  |
+
+**These are plausible category numbers, not IntelSol measurements.** Only `24/7`
+is a factual claim about your service. Publishing the other three as-is means
+stating results you have not measured, which is a real risk with an enterprise
+buyer who asks how you got them — and in some jurisdictions an advertising
+compliance issue.
+
+Replace them in `lib/content.ts` (`stats`, marked with a TODO comment) with
+audited numbers from a real engagement. If you don't have them yet, my
+recommendation is to swap in claims that are true today:
+
+- `24/7` — coverage across voice, chat and WhatsApp
+- `6+` — years of product engineering
+- `3–6 wks` — to first system in production
+- `3` — model providers benchmarked per build
+
+### 1.3 Demo videos are missing
+
+The player is built and wired to these paths, but the files do not exist:
+
+```
+public/videos/whatsapp-commerce.webm     (VP9)
+public/videos/whatsapp-commerce.mp4      (H.264)
+public/videos/lead-qualification.webm    (VP9)
+public/videos/lead-qualification.mp4     (H.264)
+```
+
+Until you drop them in, clicking play shows a clean "Demo video coming soon"
+panel with a contact link — nothing 404s and the layout does not shift.
+
+Posters are **hand-authored inline SVG** (`components/svg/PosterArt.tsx`) rather
+than the WebP files originally specified. This was deliberate: vector costs zero
+network requests, stays sharp at any density, and holds the exact 16:9 box. You
+do not need to supply poster images unless you want real screenshots.
+
+**Encode at 1280×720.** If either file exceeds ~10 MB, do not self-host it —
+move both to Cloudflare Stream or Mux and swap the `<source>` URLs in
+`lib/content.ts`. Self-hosting large video on Vercel is slow and gets expensive.
+
+Once the real videos exist, update `uploadDate` in `lib/content.ts` so the
+`VideoObject` structured data is accurate.
+
+---
+
+## 2. Things I decided on your own behalf
+
+| Decision | What I did | How to change it |
+| --- | --- | --- |
+| **Accent colour** | Used the logo mint `#3FDCC0` instead of the brief's `#5B7CFA`. The blue clashed with your mint logo, and white text on it fails WCAG AA at 3.7:1. | `--color-accent` in `app/globals.css` |
+| **Booking CTA** | You said no booking tool yet, so every "Book a free AI audit" button scrolls to the contact form. | `primaryCta.href` in `lib/content.ts` |
+| **Logo** | Hand-authored as SVG from the PNG you posted (`components/svg/Logo.tsx` + `public/images/logo.svg`). Close, but traced by eye. | Send the original vector and I'll swap it in |
+| **Public email** | The page shows `hello@intelsolai.com`. Enquiries still route to your Gmail. | `NEXT_PUBLIC_CONTACT_EMAIL` |
+| **LinkedIn URL** | Guessed `linkedin.com/company/intelsolai`. **Verify this resolves.** | `site.linkedin` in `lib/content.ts` |
+| **Pulse animation** | Used CSS `offset-path` instead of SVG `<animateMotion>`. SMIL runs on the main thread; ten animated paths above the fold would have cost the mobile performance target. | `components/svg/OrbitGraphic.tsx` |
+| **OG image** | Generated at build time by `next/og` (`app/opengraph-image.tsx`) rather than a static PNG, so it stays in sync with the brand tokens. | Edit that file, or drop in a static PNG |
+
+---
+
+## 3. Placeholders still in the page
+
+- **Privacy and Terms** links in the footer point at `#`. They need real pages
+  before you collect form submissions in the EU or UK. See `footer.legal` in
+  `lib/content.ts`.
+- **`site.linkedin`** — unverified, see above.
+
+---
+
+## 4. Known limitations
+
+**Rate limiting resets on cold start.** The contact API allows 3 submissions per
+IP per 10 minutes, held in an in-memory `Map`. On Vercel each serverless instance
+keeps its own copy and it clears when the instance recycles, so it is a speed bump
+rather than a guarantee. If you start seeing spam, move it to Upstash Redis — the
+logic is isolated at the top of `app/api/contact/route.ts` and is about a
+20-line change.
+
+**No analytics.** There are zero third-party scripts, which is most of why the
+performance score is what it is. If you add analytics, prefer Vercel Analytics
+(no extra client script) over Google Analytics, and re-run Lighthouse afterwards.
+
+**`FAQPage` structured data will not produce rich results.** Google restricted
+FAQ rich snippets to government and health sites in 2023. The markup is still
+correct and worth shipping, but don't expect FAQ dropdowns in search results.
+
+**Client JS is 125 KB gzipped, not the 90 KB in the brief.** Explained in §5.
+
+---
+
+## 5. Verified results
+
+All figures measured on the production build, not estimated.
+
+### Lighthouse — mobile, throttled
+
+| Category | Score | Target |
+| --- | --- | --- |
+| Performance | **97** | ≥ 95 |
+| Accessibility | **100** | ≥ 95 |
+| Best Practices | **100** | 100 |
+| SEO | **100** | 100 |
+
+| Metric | Measured | Budget |
+| --- | --- | --- |
+| Largest Contentful Paint | 1.8 s | < 1.8 s |
+| Cumulative Layout Shift | **0** | < 0.02 |
+| Total Blocking Time | 170 ms | — |
+| First Contentful Paint | 1.7 s | — |
+
+### Bundle
+
+| | Size (gzipped) |
+| --- | --- |
+| Shared framework JS (React + Next runtime) | 103 KB |
+| Application JS for `/` | 22.9 KB |
+| **Total first-load JS** | **125 KB** |
+| CSS | 8 KB |
+
+The brief's 90 KB budget is **not achievable on Next.js 15** — the App Router
+ships ~103 KB of framework code before a single line of application code exists.
+Of the 22.9 KB that is ours, roughly 13 KB is Zod, which the brief requires to be
+shared between client and server validation. Dropping client-side Zod validation
+would take first load to ~112 KB at the cost of inline error messages. If 90 KB
+is a hard requirement, the stack has to change (Astro or plain Vite), which means
+moving the contact endpoint to a standalone serverless function.
+
+### Manually verified
+
+- **Renders completely with JavaScript disabled** — hero, all 6 FAQ answers, and
+  all 4 use-case panels render expanded. Controls that need JS are hidden rather
+  than left dead.
+- **Contact API**, every path: 400 validation, 400 disposable domain, 200 silent
+  honeypot, 200 silent timing rejection, 429 rate limit on the 4th request, 400
+  malformed JSON, 500 misconfiguration. The real failure reason is logged
+  server-side only and never appears in a response body.
+- **Recipient address absent from the entire build output** —
+  `grep -r "ak1107842" .next/` returns nothing.
+- **Keyboard**: skip link is first focusable; 90 tab stops with no trap; tab strip
+  responds to Arrow/Home/End; accordion toggles on Enter with one panel open.
+- **Mobile nav**: opens, locks body scroll, closes on Escape, restores scroll.
+- **`prefers-reduced-motion`**: h1 at full opacity, zero hidden reveal elements,
+  marquee animation `none`, pulses parked.
+- **No horizontal overflow** at 360 / 768 / 1440 / 2560 px.
+- **All 6 JSON-LD nodes parse**: Organization, WebSite, ProfessionalService
+  (6 offers), FAQPage (6 questions), 2 × VideoObject.
+- **Zero console errors or warnings** at any breakpoint.
+
+---
+
+## 6. Running it
+
+```bash
+npm install
+cp .env.example .env.local   # then fill in the values
+npm run dev                  # http://localhost:3000
+npm run build && npm start   # production
+npm run typecheck            # tsc --noEmit, zero errors
+```
+
+Deploy to Vercel by importing the repo. Set the five environment variables from
+§1.1 in the dashboard before the first production deploy, or the form will
+return a 500.
+
+---
+
+## 7. Where things live
+
+```
+app/
+  layout.tsx              fonts, metadata, all JSON-LD
+  page.tsx                section composition only
+  globals.css             every design token, keyframe and base style
+  opengraph-image.tsx     build-time OG card
+  api/contact/route.ts    validation, honeypot, rate limit, Resend send
+components/
+  sections/               one file per page section, in page order
+  ui/                     Button, Counter, Accordion, VideoPlayer, form fields
+  svg/                    Logo, icons, OrbitGraphic, FlowDiagram, PosterArt
+lib/
+  content.ts              ALL marketing copy — edit here, not in components
+  contactSchema.ts        the one Zod schema, shared client and server
+  emailTemplate.ts        notification + auto-reply HTML and plain text
+```
+
+**To change any wording on the site, edit `lib/content.ts`.** No copy is
+hardcoded in a component.
