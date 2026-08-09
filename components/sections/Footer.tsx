@@ -69,16 +69,18 @@ export function Footer() {
 
         <div className="mono mt-14 flex flex-col gap-4 border-t border-line pt-8 text-muted sm:flex-row sm:items-center sm:justify-between">
           <p>{footer.copyright}</p>
-          <ul className="flex gap-6">
-            {footer.legal.map((item) => (
-              <li key={item.label}>
-                {/* TODO: point at real pages before launch — see HANDOFF.md */}
-                <a href={item.href} className="transition-colors duration-150 hover:text-text">
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
+          {/* Renders nothing while footer.legal is empty — see lib/content.ts */}
+          {footer.legal.length > 0 && (
+            <ul className="flex gap-6">
+              {footer.legal.map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} className="transition-colors duration-150 hover:text-text">
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </footer>

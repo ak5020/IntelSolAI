@@ -38,7 +38,9 @@ export function Products() {
               >
                 <VideoPlayer
                   title={product.title}
-                  posterKind={product.poster}
+                  width={product.width}
+                  height={product.height}
+                  poster={product.poster}
                   sources={product.sources}
                 />
               </Reveal>

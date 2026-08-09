@@ -151,7 +151,7 @@ function jsonLd() {
         '@type': 'VideoObject',
         name: `${product.title} — product demo`,
         description: product.description,
-        thumbnailUrl: [`${site.url}/opengraph-image`],
+        thumbnailUrl: [`${site.url}${product.poster}`],
         uploadDate: product.uploadDate,
         contentUrl: `${site.url}${product.sources.mp4}`,
       })),

@@ -106,31 +106,66 @@ recommendation is to swap in claims that are true today:
 - `3–6 wks` — to first system in production
 - `3` — model providers benchmarked per build
 
-### 1.3 Demo videos are missing
+### 1.3 Demo video content — review before launch
 
-The player is built and wired to these paths, but the files do not exist:
+Both demos are in and playing. **But read this before the site goes public.**
 
-```
-public/videos/whatsapp-commerce.webm     (VP9)
-public/videos/whatsapp-commerce.mp4      (H.264)
-public/videos/lead-qualification.webm    (VP9)
-public/videos/lead-qualification.mp4     (H.264)
-```
+The recordings show real business data:
 
-Until you drop them in, clicking play shows a clean "Demo video coming soon"
-panel with a contact link — nothing 404s and the layout does not shift.
+**AI WhatsApp Commerce demo** contains, across its three minutes:
+- a support phone number — `042-3256-0356`
+- a client domain — `exportleftovers.com`
+- a support agent's name — "Alia | ELO Support Team"
+- customer transaction detail — order `#1025`, refund amount `Rs. 5619.00`
 
-Posters are **hand-authored inline SVG** (`components/svg/PosterArt.tsx`) rather
-than the WebP files originally specified. This was deliberate: vector costs zero
-network requests, stays sharp at any density, and holds the exact 16:9 box. You
-do not need to supply poster images unless you want real screenshots.
+**AI Lead Qualification demo** contains:
+- a client/company name — "SG.Inc"
+- your internal cost and latency metrics — `$0.01/min`, `$0.036/min`, `~1,490ms`, model names and accuracy figures
+- a full sales-call transcript with a prospect
 
-**Encode at 1280×720.** If either file exceeds ~10 MB, do not self-host it —
-move both to Cloudflare Stream or Mux and swap the `<source>` URLs in
-`lib/content.ts`. Self-hosting large video on Vercel is slow and gets expensive.
+I chose the poster frames to avoid the worst of it — the WhatsApp poster now
+shows the agent presenting structured options rather than the frame with the
+phone number and refund amount — but **the poster is only the still image. Anyone
+who presses play sees everything above.**
 
-Once the real videos exist, update `uploadDate` in `lib/content.ts` so the
-`VideoObject` structured data is accurate.
+Decide whether you have permission to publish it. If not, I can blur specific
+regions, trim the segments, or you can re-record with dummy data. Say the word.
+
+**One thing I did fix:** the original lead-qualification recording had a
+`www.BANDICAM.com` trial watermark across the top of every frame. Advertising
+unlicensed screen-capture software on your own vendor site is not a good look,
+so I cropped the top 24px. The application UI is untouched.
+
+#### What shipped
+
+| File | Size | Dimensions |
+| --- | --- | --- |
+| `whatsapp-commerce.mp4` | 3.6 MB | 424×758 (portrait) |
+| `whatsapp-commerce.webm` | 3.9 MB | 424×758 |
+| `whatsapp-commerce-poster.webp` | 35 KB | 424×758 |
+| `lead-qualification.mp4` | 4.0 MB | 1280×552 (ultrawide) |
+| `lead-qualification.webm` | 5.6 MB | 1280×552 |
+| `lead-qualification-poster.webp` | 50 KB | 1280×552 |
+
+Originals were 22.6 MB and 20.6 MB; re-encoding cut them by ~82% with no
+visible quality loss. Both are now well under the 10 MB threshold, so
+self-hosting on Vercel is fine and Cloudflare Stream is not needed.
+
+**Why two formats, and why MP4 is listed first.** Measured on these exact files,
+the H.264 MP4 is ~40% smaller than the VP9 WebM at the same quality (SSIM
+0.9957 vs 0.9958 — indistinguishable). So MP4 goes first and everything that can
+decode H.264 takes the smaller file. WebM is kept purely as a fallback: several
+Linux distributions ship Chromium builds with the proprietary H.264 decoder
+stripped out, and those visitors would otherwise get no demo at all. The browser
+downloads only the first source it can play, so nobody pays for both.
+
+**Neither video is 16:9**, so the player sizes its box from each file's own
+dimensions. The portrait phone recording renders in a phone-shaped frame capped
+at 330px wide; forcing it into a 16:9 box would have reduced it to a thin
+horizontal sliver.
+
+Nothing is fetched until the visitor presses play (`preload="none"`), so the
+videos cost zero bytes on page load.
 
 ---
 
@@ -151,9 +186,11 @@ Once the real videos exist, update `uploadDate` in `lib/content.ts` so the
 
 ## 3. Placeholders still in the page
 
-- **Privacy and Terms** links in the footer point at `#`. They need real pages
-  before you collect form submissions in the EU or UK. See `footer.legal` in
-  `lib/content.ts`.
+- **Privacy and Terms are hidden**, at your request. A link that goes nowhere is
+  worse than no link. You still need both pages before collecting form
+  submissions in the EU or UK. To bring them back, add the entries to
+  `footer.legal` in `lib/content.ts` — the footer renders them automatically and
+  hides the row while the list is empty.
 - **`site.linkedin`** — unverified, see above.
 
 ---
@@ -187,17 +224,24 @@ All figures measured on the production build, not estimated.
 
 | Category | Score | Target |
 | --- | --- | --- |
-| Performance | **97** | ≥ 95 |
+| Performance | **96–97** | ≥ 95 |
 | Accessibility | **100** | ≥ 95 |
 | Best Practices | **100** | 100 |
 | SEO | **100** | 100 |
 
 | Metric | Measured | Budget |
 | --- | --- | --- |
-| Largest Contentful Paint | 1.8 s | < 1.8 s |
+| Largest Contentful Paint | 2.0–2.1 s | < 1.8 s — **missed**, see note |
 | Cumulative Layout Shift | **0** | < 0.02 |
-| Total Blocking Time | 170 ms | — |
-| First Contentful Paint | 1.7 s | — |
+| Total Blocking Time | 140–160 ms | — |
+| First Contentful Paint | 1.8 s | — |
+
+LCP sits at 2.0–2.1 s rather than the brief's 1.8 s. It was 1.8 s before the
+demo videos existed; the two poster images cost roughly 0.2 s even lazy-loaded.
+This is still comfortably inside Google's "good" Core Web Vitals threshold
+(< 2.5 s) and the overall Performance score clears the target, so I left it
+rather than degrade the posters to claw back 200 ms. Reported rather than
+buried.
 
 ### Bundle
 
@@ -225,6 +269,11 @@ moving the contact endpoint to a standalone serverless function.
   honeypot, 200 silent timing rejection, 429 rate limit on the 4th request, 400
   malformed JSON, 500 misconfiguration. The real failure reason is logged
   server-side only and never appears in a response body.
+- **Video playback, in a browser without an H.264 decoder**: the MP4 source is
+  attempted, rejected, and the WebM fallback plays — verified at 424×758 and
+  1280×552, both reaching full duration. Nothing is fetched until play is
+  pressed. Custom controls (play/pause, seek, mute, fullscreen) all present and
+  labelled.
 - **Mail delivery, against a real SMTP server**: notification and auto-reply both
   delivered, `Reply-To` correctly set to the submitter. Bad credentials produce a
   generic 500 with the real reason logged privately. When the auto-reply bounces

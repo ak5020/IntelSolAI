@@ -2,14 +2,19 @@
 
 import { useCallback, useRef, useState } from 'react';
 
-import { PosterArt } from '@/components/svg/PosterArt';
 import { site } from '@/lib/content';
 
 type Props = {
   title: string;
-  posterKind: string;
-  sources: { webm: string; mp4: string };
+  /** Native pixel dimensions. Drive the reserved box, so CLS stays at zero. */
+  width: number;
+  height: number;
+  poster: string;
+  sources: { mp4: string; webm: string };
 };
+
+/** Portrait demos are phone recordings; full column width would be absurdly tall. */
+const PORTRAIT_MAX_WIDTH = 330;
 
 /** mm:ss */
 function formatTime(seconds: number): string {
@@ -23,15 +28,14 @@ function formatTime(seconds: number): string {
  * Click-to-load video with hand-built controls.
  *
  * Performance shape: nothing is fetched on page load. `preload="none"` plus a
- * vector poster means the section costs zero video bytes until the visitor
- * asks for it. The 16:9 box is reserved by CSS, so loading the real file
- * cannot shift the page.
+ * poster image means the section costs no video bytes until the visitor asks
+ * for it.
  *
- * If the media files are missing (they are supplied separately — see
- * HANDOFF.md), the player degrades to a clear message with a contact link
- * rather than a broken element.
+ * The container is sized from the video's own dimensions rather than a fixed
+ * 16:9 — the two demos are 1280×552 (ultrawide) and 424×758 (portrait), and
+ * forcing either into 16:9 would crop away most of the content.
  */
-export function VideoPlayer({ title, posterKind, sources }: Props) {
+export function VideoPlayer({ title, width, height, poster, sources }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -42,33 +46,44 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
   const [duration, setDuration] = useState(0);
   const [unavailable, setUnavailable] = useState(false);
 
-  /** First click: mount the sources and start playback. */
+  const isPortrait = height > width;
+
+  /**
+   * Starts playback.
+   *
+   * Called synchronously from the click handler — deferring it (into rAF, or
+   * until after a re-render) breaks the user-gesture chain and Safari and
+   * mobile browsers reject the play() promise.
+   *
+   * A rejected play() is NOT treated as a broken video. It usually means
+   * autoplay was blocked, so the element stays mounted and paused with its
+   * controls visible; pressing play again is a fresh gesture and succeeds.
+   * Only a real media error (the `error` event) marks the demo unavailable.
+   */
+  const startPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.play().then(
+      () => setPlaying(true),
+      () => setPlaying(false),
+    );
+  }, []);
+
   const activate = useCallback(() => {
     setActivated(true);
-    // Wait a tick for <video> to mount before asking it to play.
-    requestAnimationFrame(() => {
-      const video = videoRef.current;
-      if (!video) return;
-      video.play().then(
-        () => setPlaying(true),
-        () => setUnavailable(true),
-      );
-    });
-  }, []);
+    startPlayback();
+  }, [startPlayback]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
-      video.play().then(
-        () => setPlaying(true),
-        () => setUnavailable(true),
-      );
+      startPlayback();
     } else {
       video.pause();
       setPlaying(false);
     }
-  }, []);
+  }, [startPlayback]);
 
   const toggleMute = useCallback(() => {
     const video = videoRef.current;
@@ -94,23 +109,47 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
   return (
     <div
       ref={wrapRef}
-      className="relative overflow-hidden rounded-card border border-line bg-bg-elev"
-      style={{ aspectRatio: '16 / 9' }}
+      className="relative mx-auto w-full overflow-hidden rounded-card border border-line bg-bg-elev"
+      style={{
+        aspectRatio: `${width} / ${height}`,
+        maxWidth: isPortrait ? PORTRAIT_MAX_WIDTH : undefined,
+      }}
     >
-      {/* Poster layer — stays mounted underneath so there is never a blank
-          frame while the video buffers. */}
+      {/*
+        Plain <img>, not next/image: the poster is already an optimally sized
+        WebP, so running it through the image optimizer would add runtime cost
+        for no gain. Explicit width/height plus the container's aspect-ratio
+        means the box is reserved before anything loads.
+      */}
       {!activated && (
-        <div className="absolute inset-0">
-          <PosterArt kind={posterKind} />
-        </div>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={poster}
+          alt={`${title} demo — preview frame`}
+          width={width}
+          height={height}
+          /* Well below the fold — eager loading here competes with the hero
+             for bandwidth and measurably delays LCP. */
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       )}
 
-      {activated && !unavailable && (
+      {/*
+        Always mounted, never conditionally rendered: preload="none" means the
+        browser downloads nothing until play() is called, so keeping it in the
+        DOM is free and means the click handler has a real element to act on.
+      */}
+      {!unavailable && (
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full bg-bg object-cover"
-          width={1280}
-          height={720}
+          className={`absolute inset-0 h-full w-full bg-bg object-contain ${
+            activated ? '' : 'invisible'
+          }`}
+          width={width}
+          height={height}
+          poster={poster}
           preload="none"
           playsInline
           onTimeUpdate={(e) => {
@@ -119,20 +158,34 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
           }}
           onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
           onEnded={() => setPlaying(false)}
-          onError={() => setUnavailable(true)}
+          onError={(e) => {
+            /*
+              A <source> that the browser cannot decode also surfaces here,
+              because React delegates error events from child elements. That is
+              NOT fatal — it just means the browser is about to try the next
+              source. Bailing out on it would unmount the element and destroy
+              the fallback chain.
+
+              The video element only sets its own `error` property once every
+              source has failed, so that is the real signal.
+            */
+            if (e.currentTarget.error) setUnavailable(true);
+          }}
         >
-          <source src={sources.webm} type="video/webm" />
+          {/* MP4 first: it is the smaller file, so anything that can decode
+              H.264 takes it. WebM catches Chromium builds that cannot. */}
           <source src={sources.mp4} type="video/mp4" />
+          <source src={sources.webm} type="video/webm" />
           Your browser does not support embedded video.
         </video>
       )}
 
-      {/* Missing-file fallback ------------------------------------------- */}
+      {/* Playback failure fallback — never a broken element. */}
       {unavailable && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-bg-elev px-6 text-center">
-          <p className="mono text-muted">Demo video coming soon</p>
+          <p className="mono text-muted">Demo unavailable</p>
           <p className="max-w-sm text-sm text-body">
-            The recording for {title} isn&apos;t published yet.{' '}
+            We couldn&apos;t play the {title} demo here.{' '}
             <a href="#contact" className="text-accent underline underline-offset-4">
               Ask us for a live walkthrough
             </a>{' '}
@@ -150,18 +203,12 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
         <button
           type="button"
           onClick={activate}
-          className="group absolute inset-0 flex items-center justify-center bg-bg/35 transition-colors duration-150 hover:bg-bg/20"
+          className="group absolute inset-0 flex items-center justify-center bg-bg/40 transition-colors duration-150 hover:bg-bg/25"
         >
           <span className="sr-only">Play the {title} demo</span>
           <svg viewBox="0 0 72 72" className="h-20 w-20" aria-hidden="true" fill="none">
             {/* Ring draws itself on hover via stroke-dashoffset. */}
-            <circle
-              cx="36"
-              cy="36"
-              r="33"
-              stroke="var(--color-line-strong)"
-              strokeWidth="1.5"
-            />
+            <circle cx="36" cy="36" r="33" stroke="var(--color-line-strong)" strokeWidth="1.5" />
             <circle
               cx="36"
               cy="36"
@@ -181,7 +228,7 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
 
       {/* Controls --------------------------------------------------------- */}
       {activated && !unavailable && (
-        <div className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-bg/95 to-transparent px-3 py-3 sm:px-4">
+        <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-bg/95 to-transparent px-2 py-2 sm:gap-3 sm:px-4 sm:py-3">
           <button
             type="button"
             onClick={togglePlay}
@@ -189,11 +236,7 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-btn text-text transition-colors duration-150 hover:bg-bg-elev-2"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true" fill="currentColor">
-              {playing ? (
-                <path d="M8 5h3v14H8zM13 5h3v14h-3z" />
-              ) : (
-                <path d="M8 5.5 18 12 8 18.5Z" />
-              )}
+              {playing ? <path d="M8 5h3v14H8zM13 5h3v14h-3z" /> : <path d="M8 5.5 18 12 8 18.5Z" />}
             </svg>
           </button>
 
@@ -208,9 +251,12 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
             className="h-11 min-w-0 flex-1 cursor-pointer accent-[var(--color-accent)]"
           />
 
-          <span className="mono hidden shrink-0 text-muted sm:inline">
-            {formatTime((progress / 100) * duration)} / {formatTime(duration)}
-          </span>
+          {/* Hidden on the narrow portrait player, where there is no room. */}
+          {!isPortrait && (
+            <span className="mono hidden shrink-0 text-muted sm:inline">
+              {formatTime((progress / 100) * duration)} / {formatTime(duration)}
+            </span>
+          )}
 
           <button
             type="button"
@@ -229,11 +275,7 @@ export function VideoPlayer({ title, posterKind, sources }: Props) {
               strokeLinejoin="round"
             >
               <path d="M4 9.5h3L11.5 6v12L7 14.5H4Z" />
-              {muted ? (
-                <path d="m15.5 10 4 4m0-4-4 4" />
-              ) : (
-                <path d="M15 9.25a4 4 0 0 1 0 5.5M17.75 7a7 7 0 0 1 0 10" />
-              )}
+              {muted ? <path d="m15.5 10 4 4m0-4-4 4" /> : <path d="M15 9.25a4 4 0 0 1 0 5.5M17.75 7a7 7 0 0 1 0 10" />}
             </svg>
           </button>
 

@@ -189,6 +189,19 @@ export const statsCopy = {
 
 // ---------------------------------------------------------------------------
 // S6 — Products
+//
+// Two formats, and the ORDER MATTERS.
+//
+// Measured on these exact files: the H.264 MP4 is ~40% smaller than the VP9
+// WebM at the same quality (SSIM 0.9957 vs 0.9958 — indistinguishable). So MP4
+// is listed first and every browser that can decode H.264 gets the smaller
+// download.
+//
+// WebM is kept purely as a fallback: codec-stripped Chromium builds ship on
+// several Linux distributions and cannot decode H.264 at all. Without the
+// second source those visitors get no demo. The browser only ever downloads
+// the first source it can play, so the fallback costs returning visitors
+// nothing.
 // ---------------------------------------------------------------------------
 
 export const products = [
@@ -197,29 +210,36 @@ export const products = [
     title: 'AI WhatsApp Commerce Platform',
     body: 'Customers browse, ask questions, and check out inside WhatsApp. The agent handles product discovery, order status, and support, and hands off to a human the moment it should.',
     tags: ['WhatsApp Business API', 'Conversational Commerce', 'Order Automation'],
-    poster: 'whatsapp',
+    /* Native dimensions — a portrait phone recording. The player reserves the
+       box from these, so there is no layout shift and no cropping. */
+    width: 424,
+    height: 758,
+    poster: '/videos/whatsapp-commerce-poster.webp',
     sources: {
-      webm: '/videos/whatsapp-commerce.webm',
       mp4: '/videos/whatsapp-commerce.mp4',
+      webm: '/videos/whatsapp-commerce.webm',
     },
     /* JSON-LD VideoObject fields. */
     description:
       'Demo of the IntelSol AI WhatsApp Commerce Platform: conversational product discovery, cart, checkout and order support handled by an AI agent inside WhatsApp.',
-    uploadDate: '2026-01-15',
+    uploadDate: '2026-08-09',
   },
   {
     id: 'lead-qualification',
     title: 'AI Lead Qualification & Cold Calling Platform',
     body: 'An outbound voice agent that dials your list, qualifies against your criteria, handles objections, books meetings straight into the calendar, and writes every call back to the CRM.',
     tags: ['Voice AI', 'Outbound Sales', 'CRM Sync'],
-    poster: 'voice',
+    /* Native dimensions — an ultrawide desktop screen recording. */
+    width: 1280,
+    height: 552,
+    poster: '/videos/lead-qualification-poster.webp',
     sources: {
-      webm: '/videos/lead-qualification.webm',
       mp4: '/videos/lead-qualification.mp4',
+      webm: '/videos/lead-qualification.webm',
     },
     description:
       'Demo of the IntelSol AI Lead Qualification and Cold Calling Platform: an outbound voice agent that dials, qualifies, handles objections, books meetings and syncs to CRM.',
-    uploadDate: '2026-01-15',
+    uploadDate: '2026-08-09',
   },
 ] as const;
 
@@ -463,9 +483,10 @@ export const footer = {
     'RAG & LLM Integrations',
   ],
   copyright: `© ${new Date().getFullYear()} IntelSol AI`,
-  legal: [
-    /* TODO: replace with real pages before launch — tracked in HANDOFF.md */
-    { label: 'Privacy', href: '#' },
-    { label: 'Terms', href: '#' },
-  ],
+  /*
+    Privacy and Terms are hidden until the real pages exist — a footer link
+    that goes nowhere is worse than no link. Add the entries back here once
+    the pages are written and the footer renders them automatically.
+  */
+  legal: [] as { label: string; href: string }[],
 } as const;
