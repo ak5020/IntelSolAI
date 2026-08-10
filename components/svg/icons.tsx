@@ -162,6 +162,13 @@ export const ArrowRightIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const ArrowUpIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 19.25V4.75" />
+    <path d="m6.25 10.5 5.75-5.75 5.75 5.75" />
+  </Icon>
+);
+
 export const MailIcon = (p: IconProps) => (
   <Icon {...p}>
     <rect x="2.75" y="5" width="18.5" height="14" rx="2" />

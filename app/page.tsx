@@ -10,6 +10,7 @@ import { Process } from '@/components/sections/Process';
 import { Products } from '@/components/sections/Products';
 import { Services } from '@/components/sections/Services';
 import { Stats } from '@/components/sections/Stats';
+import { ScrollTop } from '@/components/ui/ScrollTop';
 import { UseCases } from '@/components/sections/UseCases';
 
 /** Section composition only — all markup lives in the section components. */
@@ -31,6 +32,7 @@ export default function Page() {
         <Cta />
       </main>
       <Footer />
+      <ScrollTop />
     </>
   );
 }

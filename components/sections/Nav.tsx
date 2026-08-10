@@ -52,6 +52,7 @@ export function Nav() {
   }, [menuOpen]);
 
   return (
+    <>
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300 ${
         scrolled || menuOpen
@@ -139,9 +140,19 @@ export function Nav() {
           </button>
         </div>
       </nav>
+    </header>
 
-      {/* Mobile overlay --------------------------------------------------- */}
-      <div
+    {/*
+      The overlay lives OUTSIDE <header> on purpose.
+
+      The header carries `backdrop-blur` once scrolled or opened, and
+      backdrop-filter makes an element the containing block for its
+      position:fixed descendants — exactly like transform and filter do. Nested
+      inside, this panel's `top-[72px] bottom-0` resolved against the header's
+      72px box instead of the viewport and collapsed to 1px tall, so the menu
+      opened to nothing on every mobile device.
+    */}
+    <div
         id="mobile-menu"
         hidden={!menuOpen}
         className="fixed inset-x-0 bottom-0 top-[72px] z-40 overflow-y-auto border-t border-line bg-bg lg:hidden"
@@ -171,7 +182,7 @@ export function Nav() {
             {primaryCta.label}
           </a>
         </div>
-      </div>
-    </header>
+    </div>
+    </>
   );
 }
