@@ -185,6 +185,29 @@ export const LinkedInIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const CalendarIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3.75" y="5" width="16.5" height="15.25" rx="2.5" />
+    <path d="M3.75 9.75h16.5M8.5 3.5v3M15.5 3.5v3" />
+    <path d="m9.75 14.5 1.75 1.75 3.25-3.5" />
+  </Icon>
+);
+
+export const SyncIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.75 12a7.25 7.25 0 0 1 12.4-5.1" />
+    <path d="M19.25 12a7.25 7.25 0 0 1-12.4 5.1" />
+    <path d="M17.25 3.5v3.5h-3.5M6.75 20.5V17h3.5" />
+  </Icon>
+);
+
+export const UserIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="8.25" r="3.5" />
+    <path d="M4.75 20.25a7.25 7.25 0 0 1 14.5 0" />
+  </Icon>
+);
+
 export const CheckIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="m4.75 12.5 4.5 4.5 10-10" />

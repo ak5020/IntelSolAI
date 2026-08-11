@@ -224,7 +224,7 @@ All figures measured on the production build, not estimated.
 
 | Category | Score | Target |
 | --- | --- | --- |
-| Performance | **96–97** | ≥ 95 |
+| Performance | **94–96** (median 95, five runs) | ≥ 95 |
 | Accessibility | **100** | ≥ 95 |
 | Best Practices | **100** | 100 |
 | SEO | **100** | 100 |
@@ -235,6 +235,12 @@ All figures measured on the production build, not estimated.
 | Cumulative Layout Shift | **0** | < 0.02 |
 | Total Blocking Time | 140–160 ms | — |
 | First Contentful Paint | 1.8 s | — |
+
+**On the Performance number:** it moves ±6 points run to run on the machine
+this was measured on, so treat any single reading with suspicion. Measuring the
+page with the workflow canvas removed produced 96 / 95 / 90 — the same spread —
+which confirms the canvas costs nothing measurable and that the variance is
+environmental. Re-run it on your own hardware before drawing conclusions.
 
 LCP sits at 2.0–2.1 s rather than the brief's 1.8 s. It was 1.8 s before the
 demo videos existed; the two poster images cost roughly 0.2 s even lazy-loaded.
@@ -269,6 +275,11 @@ moving the contact endpoint to a standalone serverless function.
   honeypot, 200 silent timing rejection, 429 rate limit on the 4th request, 400
   malformed JSON, 500 misconfiguration. The real failure reason is logged
   server-side only and never appears in a response body.
+- **Workflow canvas**: nodes and edges render complete under
+  `prefers-reduced-motion` (opacity 1, stroke-dashoffset 0) rather than staying
+  mid-animation. Animations attach only once the section scrolls into view.
+  Below `lg` the canvas is replaced by a readable vertical stack of the same
+  eight steps, so nothing depends on being able to see a wide diagram.
 - **Video playback, in a browser without an H.264 decoder**: the MP4 source is
   attempted, rejected, and the WebM fallback plays — verified at 424×758 and
   1280×552, both reaching full duration. Nothing is fetched until play is

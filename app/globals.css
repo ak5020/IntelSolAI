@@ -473,3 +473,22 @@ html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
     animation: none;
   }
 }
+
+/* ===========================================================================
+   Workflow canvas (S5b)
+   ---------------------------------------------------------------------------
+   Nodes rise into place as the graph assembles itself. `both` fill keeps them
+   hidden through their delay; the reduced-motion block above collapses the
+   duration so they simply appear.
+   =========================================================================== */
+
+@keyframes node-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

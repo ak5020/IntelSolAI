@@ -188,6 +188,38 @@ export const statsCopy = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// S5b — Workflow canvas
+//
+// The node graph is a real pipeline, not decoration: this is the shape of a
+// lead-handling system we would actually build. Positions live in the
+// component because they are geometry, not copy.
+// ---------------------------------------------------------------------------
+
+export const workflowCopy = {
+  eyebrow: 'Under the hood',
+  heading: 'Logic you can point at',
+  sub: 'Every system we ship is a graph you can read: what triggers it, which tools the agent may call, where it decides, and the exact point a human takes over. No black box.',
+  /* Shown on the canvas chrome. */
+  fileName: 'lead-pipeline',
+  status: 'Running',
+} as const;
+
+/** Icon keys resolve against components/svg/icons.tsx. */
+export const workflowNodes = [
+  { id: 'trigger', icon: 'mail', title: 'New enquiry', meta: 'Webhook' },
+  { id: 'enrich', icon: 'crm', title: 'Enrich & score', meta: 'Data lookup' },
+  { id: 'agent', icon: 'agent', title: 'IntelSol Agent', meta: 'Tools + memory' },
+  { id: 'reply', icon: 'chat', title: 'Draft reply', meta: 'LLM' },
+  { id: 'qualify', icon: 'check', title: 'Qualify', meta: 'Your criteria' },
+  { id: 'book', icon: 'calendar', title: 'Book meeting', meta: 'Calendar' },
+  { id: 'sync', icon: 'sync', title: 'CRM sync', meta: 'Two-way' },
+  { id: 'escalate', icon: 'user', title: 'Escalate', meta: 'Human handoff' },
+] as const;
+
+/** Model providers shown on the canvas rail. */
+export const workflowStack = ['OpenAI', 'Anthropic Claude', 'Google Gemini'] as const;
+
+// ---------------------------------------------------------------------------
 // S6 — Products
 //
 // Two formats, and the ORDER MATTERS.

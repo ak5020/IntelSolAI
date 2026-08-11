@@ -10,6 +10,7 @@ import { Process } from '@/components/sections/Process';
 import { Products } from '@/components/sections/Products';
 import { Services } from '@/components/sections/Services';
 import { Stats } from '@/components/sections/Stats';
+import { Workflow } from '@/components/sections/Workflow';
 import { ScrollTop } from '@/components/ui/ScrollTop';
 import { UseCases } from '@/components/sections/UseCases';
 
@@ -22,6 +23,7 @@ export default function Page() {
         <Hero />
         <Marquee />
         <Services />
+        <Workflow />
         <Stats />
         <Products />
         <Process />
