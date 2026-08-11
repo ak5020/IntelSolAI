@@ -18,7 +18,7 @@ export const site = {
     'AI automation and software engineering that turns AI into measurable business results.',
   /* Public-facing address only. The address that actually receives enquiries
      lives in CONTACT_TO_EMAIL, server-side, and never reaches the client. */
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hello@intelsolai.com',
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'intelagen01@gmail.com',
   linkedin: 'https://www.linkedin.com/company/intelsolai',
 } as const;
 

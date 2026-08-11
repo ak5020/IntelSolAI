@@ -1,5 +1,6 @@
-import { LinkedInIcon, MailIcon } from '@/components/svg/icons';
+import { LinkedInIcon } from '@/components/svg/icons';
 import { Logo } from '@/components/svg/Logo';
+import { CopyEmail } from '@/components/ui/CopyEmail';
 import { footer, navLinks, site } from '@/lib/content';
 
 /** S13 — footer. */
@@ -44,13 +45,7 @@ export function Footer() {
             <h2 className="mono mb-4 text-muted">Contact</h2>
             <ul className="flex flex-col gap-3">
               <li>
-                <a
-                  href={`mailto:${site.email}`}
-                  className="inline-flex items-center gap-2 text-[0.95rem] text-body transition-colors duration-150 hover:text-text"
-                >
-                  <MailIcon className="h-4 w-4" />
-                  Email
-                </a>
+                <CopyEmail label="Email" className="gap-2 text-[0.95rem]" iconClassName="h-4 w-4" />
               </li>
               <li>
                 <a

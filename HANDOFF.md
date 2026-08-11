@@ -42,7 +42,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=ak1107842@gmail.com
 SMTP_PASS=<the 16-character App Password>
-NEXT_PUBLIC_CONTACT_EMAIL=hello@intelsolai.com
+NEXT_PUBLIC_CONTACT_EMAIL=intelagen01@gmail.com
 NEXT_PUBLIC_SITE_URL=https://intelsolai.com
 ```
 
@@ -232,7 +232,7 @@ they were not served — nothing links to them.
 | **Accent colour** | Used the logo mint `#3FDCC0` instead of the brief's `#5B7CFA`. The blue clashed with your mint logo, and white text on it fails WCAG AA at 3.7:1. | `--color-accent` in `app/globals.css` |
 | **Booking CTA** | You said no booking tool yet, so every "Book a free AI audit" button scrolls to the contact form. | `primaryCta.href` in `lib/content.ts` |
 | **Logo** | Hand-authored as SVG from the PNG you posted (`components/svg/Logo.tsx` + `public/images/logo.svg`). Close, but traced by eye. | Send the original vector and I'll swap it in |
-| **Public email** | The page shows `hello@intelsolai.com`. Enquiries still route to your Gmail. | `NEXT_PUBLIC_CONTACT_EMAIL` |
+| **Public email** | The page shows `intelagen01@gmail.com`. Enquiries still route to your Gmail. | `NEXT_PUBLIC_CONTACT_EMAIL` |
 | **LinkedIn URL** | Guessed `linkedin.com/company/intelsolai`. **Verify this resolves.** | `site.linkedin` in `lib/content.ts` |
 | **Pulse animation** | Used CSS `offset-path` instead of SVG `<animateMotion>`. SMIL runs on the main thread; ten animated paths above the fold would have cost the mobile performance target. | `components/svg/OrbitGraphic.tsx` |
 | **Mail provider** | Made it switchable rather than Resend-only, so Gmail SMTP works today without DNS. | `lib/mailer.ts`, env vars |

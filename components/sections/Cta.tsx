@@ -1,5 +1,6 @@
-import { LinkedInIcon, MailIcon } from '@/components/svg/icons';
+import { LinkedInIcon } from '@/components/svg/icons';
 import { OrbitGraphic } from '@/components/svg/OrbitGraphic';
+import { CopyEmail } from '@/components/ui/CopyEmail';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { contact, site } from '@/lib/content';
 
@@ -37,13 +38,7 @@ export function Cta() {
 
           <ul className="mt-9 flex flex-col gap-4">
             <li>
-              <a
-                href={`mailto:${site.email}`}
-                className="inline-flex items-center gap-3 text-body transition-colors duration-150 hover:text-text"
-              >
-                <MailIcon className="h-5 w-5 text-muted" />
-                {site.email}
-              </a>
+              <CopyEmail />
             </li>
             <li>
               <a
