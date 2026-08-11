@@ -1,3 +1,4 @@
+import { Clients } from '@/components/sections/Clients';
 import { Cta } from '@/components/sections/Cta';
 import { Faq } from '@/components/sections/Faq';
 import { Footer } from '@/components/sections/Footer';
@@ -26,6 +27,7 @@ export default function Page() {
         <Workflow />
         <Stats />
         <Products />
+        <Clients />
         <Process />
         <UseCases />
         <Industries />

@@ -167,6 +167,51 @@ horizontal sliver.
 Nothing is fetched until the visitor presses play (`preload="none"`), so the
 videos cost zero bytes on page load.
 
+### 1.4 Client logos and testimonials — permission and wording
+
+The client strip names five real companies. Two things need settling before it
+is public.
+
+**Permission.** Using a company's name and logo as a client reference normally
+needs their sign-off, and for a regulated institution like Finance House or a
+listed healthcare vendor like NextGen Healthcare it is not something to assume.
+Confirm each of the five, in writing if you can.
+
+**The copy is not a testimonial, deliberately.** You asked for comments
+"including facts and figures". I did not write those, and I would push back on
+anyone who offers to. A testimonial is a statement attributed to a customer;
+inventing one — and inventing the numbers inside it — means publishing words
+those companies never said. Under the FTC Endorsement Guides and the UAE and UK
+equivalents an endorsement has to reflect a real customer's actual experience,
+and your own brief said "never invent metrics, client names, logos, or
+testimonials". Fabricated results attributed to a named financial institution
+is the kind of claim that draws a letter.
+
+So each panel in `lib/content.ts` carries a `summary` instead: a factual
+description of the kind of work IntelSol does for an operation like theirs,
+written from the public description of each business, with no metrics and no
+quotation marks. It reads as capability, which is honest, rather than as praise
+you did not receive.
+
+**If you get a real quote**, add `quote` and `attribution` to that client and
+the panel renders the quote instead of the summary automatically — no component
+changes. Something like:
+
+```ts
+quote: 'Their agent handles first-line triage overnight, so the team starts the day with a clean queue.',
+attribution: 'Name, Role — Company',
+```
+
+Only publish what the client actually said and approved.
+
+**Logo files.** `public/logos/` currently holds five generated placeholders.
+Replace each with the real mark, keeping the filenames — see the README in that
+folder. They sit on a light tile rather than directly on the page background,
+because several of these marks are navy or black and a transparent PNG of a
+dark logo on a near-black page is invisible. If you want them on the dark
+background instead, you need white or monochrome versions, which each company's
+brand guidelines may or may not permit.
+
 ---
 
 ## 2. Things I decided on your own behalf

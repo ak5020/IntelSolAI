@@ -1,0 +1,280 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { Eyebrow } from '@/components/ui/Eyebrow';
+import { Tag } from '@/components/ui/Tag';
+import { clients, clientsCopy } from '@/lib/content';
+
+/**
+ * S6b — client strip.
+ *
+ * The logos drift continuously. Pointing at one stops the strip, dims the
+ * others, draws a workflow edge downward and expands a panel describing what
+ * we built for them. Leaving the section closes the panel and the strip picks
+ * up where it left off.
+ *
+ * Interaction rules, in order of who they serve:
+ *   - pointer: hover opens, leaving the section closes
+ *   - keyboard: focus opens, Escape closes
+ *   - touch: tap toggles, because there is no hover to leave
+ *
+ * Without JavaScript the strip still scrolls and every panel renders open and
+ * stacked, so nothing is trapped behind a control that cannot run.
+ */
+export function Clients() {
+  const [active, setActive] = useState<number | null>(null);
+  /* Horizontal position of the connector, in px from the left of the strip.
+     null until a chip has been measured. */
+  const [edgeX, setEdgeX] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Opens a client and anchors the connector under the chip that was actually
+   * pointed at — including the marquee's second copy, which sits somewhere
+   * completely different on screen. Measuring is safe here because entering
+   * the strip has already stopped it, so the chip is not moving.
+   */
+  const open = useCallback((index: number, el: HTMLElement) => {
+    setActive(index);
+    const wrap = sectionRef.current;
+    if (!wrap) return;
+    const chip = el.getBoundingClientRect();
+    const bounds = wrap.getBoundingClientRect();
+    const centre = chip.left + chip.width / 2 - bounds.left;
+    // Keep the edge inside the strip even when the chip is half off-screen.
+    setEdgeX(Math.min(Math.max(centre, 24), bounds.width - 24));
+  }, []);
+
+  const close = useCallback(() => setActive(null), []);
+
+  /**
+   * Pointer-leave close, but only on devices that genuinely hover.
+   *
+   * After a tap, Chrome synthesises a mouse sequence that ends in mouseleave,
+   * so binding close() to it directly made the panel open and shut again
+   * instantly on every phone.
+   */
+  const closeOnPointerLeave = useCallback(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) return;
+    close();
+  }, [close]);
+
+  useEffect(() => {
+    if (active === null) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    /* On touch there is no "moving away", so tapping anywhere outside the
+       section is the way to dismiss it. */
+    const onPointerDown = (e: PointerEvent) => {
+      if (!sectionRef.current?.contains(e.target as Node)) close();
+    };
+
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [active, close]);
+
+  const activeClient = active === null ? null : clients[active];
+
+  /* One chip. Rendered twice by the marquee, so the second copy is hidden from
+     assistive tech and taken out of the tab order to avoid duplicate stops. */
+  const Chip = ({ index, duplicate }: { index: number; duplicate: boolean }) => {
+    const client = clients[index]!;
+    const isActive = active === index;
+    const dimmed = active !== null && !isActive;
+
+    return (
+      <button
+        type="button"
+        aria-hidden={duplicate ? true : undefined}
+        tabIndex={duplicate ? -1 : 0}
+        aria-expanded={duplicate ? undefined : isActive}
+        aria-controls={duplicate ? undefined : 'client-detail'}
+        onMouseEnter={(e) => open(index, e.currentTarget)}
+        onFocus={(e) => open(index, e.currentTarget)}
+        onClick={(e) => (isActive ? close() : open(index, e.currentTarget))}
+        className={`group relative flex h-[76px] w-[196px] shrink-0 items-center justify-center rounded-card border px-5 transition-[opacity,border-color,background-color,filter] duration-300 ${
+          isActive
+            ? 'border-accent bg-bg-elev-2'
+            : 'border-line bg-bg-elev hover:border-line-strong'
+        } ${dimmed ? 'opacity-25 grayscale' : 'opacity-100'}`}
+      >
+        {/*
+          Logos sit on a light chip. Several of these marks are navy or black,
+          and a transparent PNG of a dark logo on a near-black page is
+          invisible — the tile keeps every brand legible without recolouring
+          anyone's mark.
+        */}
+        <span className="flex h-full w-full items-center justify-center rounded-btn bg-[#F4F6F8] px-3 py-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={client.logo}
+            alt={`${client.name} logo`}
+            width={160}
+            height={48}
+            loading="lazy"
+            decoding="async"
+            className="max-h-[44px] w-auto max-w-full object-contain"
+            onError={(e) => {
+              /* Until the real file is dropped in, fall back to the company
+                 name rather than a broken-image icon. */
+              const img = e.currentTarget;
+              img.style.display = 'none';
+              img.insertAdjacentHTML(
+                'afterend',
+                `<span class="text-center text-[0.7rem] font-semibold leading-tight text-[#07090C]">${client.name}</span>`,
+              );
+            }}
+          />
+        </span>
+      </button>
+    );
+  };
+
+  return (
+    <section
+      id="clients"
+      aria-labelledby="clients-heading"
+      className="defer-paint border-t border-line"
+      style={{ paddingBlock: 'var(--section-y)' }}
+    >
+      <div className="shell">
+        <header className="mb-12 max-w-3xl md:mb-14">
+          <Eyebrow>{clientsCopy.eyebrow}</Eyebrow>
+          <h2 id="clients-heading" className="mt-4">
+            {clientsCopy.heading}
+          </h2>
+          <p className="mt-5 max-w-2xl text-body">{clientsCopy.sub}</p>
+        </header>
+      </div>
+
+      {/* Leaving this wrapper closes the panel — it spans the strip AND the
+          panel, so travelling between them does not dismiss it. */}
+      <div ref={sectionRef} onMouseLeave={closeOnPointerLeave}>
+        <div className="marquee client-strip overflow-hidden">
+          <div
+            className="marquee-track gap-4 px-2"
+            style={{
+              animationName: 'marquee-left',
+              animationDuration: '46s',
+              /*
+                Left undefined while nothing is open so the shared
+                `.marquee:hover` / `:focus-within` rule in globals.css can stop
+                the strip the moment the cursor or focus enters it — an inline
+                value here would override that rule.
+
+                Pausing on strip-enter rather than chip-enter matters: a chip
+                that is still sliding is a moving target, which is awkward with
+                a mouse and genuinely hard with a motor impairment. Stopping
+                first means the logo is stationary before anyone has to hit it.
+
+                The explicit pause covers touch, where a tap sets the active
+                client without any hover ever occurring.
+              */
+              animationPlayState: active !== null ? 'paused' : undefined,
+            }}
+          >
+            {[0, 1].map((copy) => (
+              <div key={copy} data-marquee-copy={copy} className="flex shrink-0 gap-4 pr-4">
+                {clients.map((client, i) => (
+                  <Chip key={`${copy}-${client.id}`} index={i} duplicate={copy === 1} />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* --- Connector: full-bleed so it can sit under any chip --------- */}
+        <div className="relative h-11">
+          {activeClient && edgeX !== null && (
+            <svg
+              viewBox="0 0 24 44"
+              className="absolute top-0 h-11 w-6 -translate-x-1/2"
+              style={{ left: edgeX }}
+              aria-hidden="true"
+              fill="none"
+            >
+              <path
+                d="M12 0 V36"
+                stroke="var(--color-accent)"
+                strokeWidth="1.5"
+                strokeDasharray="36"
+                style={{ animation: 'draw 320ms var(--ease-out-expo) both' }}
+              />
+              <circle cx="12" cy="39" r="3.5" fill="var(--color-accent)" />
+            </svg>
+          )}
+        </div>
+
+        {/* --- Detail panel ----------------------------------------------- */}
+        <div className="shell">
+          <div
+            className="client-panel"
+            data-open={activeClient ? 'true' : 'false'}
+            id="client-detail"
+            aria-live="polite"
+          >
+            <div>
+
+              {activeClient && (
+                <article className="rounded-card border border-accent bg-bg-elev p-6 sm:p-8">
+                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                    <h3 className="text-[1.25rem]">{activeClient.name}</h3>
+                    <span className="mono text-muted">{activeClient.sector}</span>
+                  </div>
+
+                  {activeClient.quote ? (
+                    <blockquote className="mt-5 max-w-3xl border-l-2 border-accent pl-5 text-body">
+                      “{activeClient.quote}”
+                      {activeClient.attribution && (
+                        <footer className="mono mt-3 text-muted">
+                          {activeClient.attribution}
+                        </footer>
+                      )}
+                    </blockquote>
+                  ) : (
+                    <p className="mt-5 max-w-3xl text-body">{activeClient.summary}</p>
+                  )}
+
+                  <ul className="mt-6 flex flex-wrap gap-2">
+                    {activeClient.tags.map((tag) => (
+                      <li key={tag}>
+                        <Tag>{tag}</Tag>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              )}
+            </div>
+          </div>
+
+          {/* Resting hint, swapped out once a panel is open. */}
+          {!activeClient && (
+            <p className="mono mt-6 text-center text-muted">
+              Hover or tap a logo to see the build
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* --- No-JS fallback: every client, plainly ---------------------- */}
+      <noscript>
+        <div className="shell mt-10 grid gap-4 sm:grid-cols-2">
+          {clients.map((client) => (
+            <article key={client.id} className="rounded-card border border-line bg-bg-elev p-6">
+              <h3 className="text-[1.05rem]">{client.name}</h3>
+              <p className="mono mt-1 text-muted">{client.sector}</p>
+              <p className="mt-4 text-[0.95rem] text-body">{client.summary}</p>
+            </article>
+          ))}
+        </div>
+      </noscript>
+    </section>
+  );
+}

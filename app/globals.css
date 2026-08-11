@@ -492,3 +492,70 @@ html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
     transform: none;
   }
 }
+
+/* ===========================================================================
+   Client strip (S6b)
+   ---------------------------------------------------------------------------
+   The detail panel expands with grid-template-rows, the same technique as the
+   FAQ accordion: no JS height measurement, smooth at any content length.
+   =========================================================================== */
+
+.client-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 320ms var(--ease-out-expo);
+}
+
+.client-panel > div {
+  overflow: hidden;
+}
+
+.client-panel[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .client-panel {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Client strip on touch devices
+   ---------------------------------------------------------------------------
+   An auto-scrolling strip is fine when it is decorative, but these chips are
+   the interaction. With no hover there is nothing to pause it, so the target
+   never stops moving and tapping a specific logo is a matter of luck.
+
+   On coarse pointers the animation is dropped entirely and the strip becomes a
+   normal swipeable, snapping scroller — the native mobile pattern, and a
+   stationary target. The duplicate marquee copy is hidden because it only
+   exists to make the loop seamless.
+--------------------------------------------------------------------------- */
+
+@media (hover: none) {
+  .client-strip {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .client-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .client-strip .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .client-strip [data-marquee-copy='1'] {
+    display: none;
+  }
+
+  .client-strip button {
+    scroll-snap-align: center;
+  }
+}
