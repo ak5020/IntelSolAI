@@ -224,7 +224,7 @@ All figures measured on the production build, not estimated.
 
 | Category | Score | Target |
 | --- | --- | --- |
-| Performance | **94–96** (median 95, five runs) | ≥ 95 |
+| Performance | **94–95** on the build VM — see note | ≥ 95 |
 | Accessibility | **100** | ≥ 95 |
 | Best Practices | **100** | 100 |
 | SEO | **100** | 100 |
@@ -236,11 +236,26 @@ All figures measured on the production build, not estimated.
 | Total Blocking Time | 140–160 ms | — |
 | First Contentful Paint | 1.8 s | — |
 
-**On the Performance number:** it moves ±6 points run to run on the machine
-this was measured on, so treat any single reading with suspicion. Measuring the
-page with the workflow canvas removed produced 96 / 95 / 90 — the same spread —
-which confirms the canvas costs nothing measurable and that the variance is
-environmental. Re-run it on your own hardware before drawing conclusions.
+**On the Performance number — read this before acting on it.**
+
+It was measured on a throttled cloud VM, and the figure is sensitive to what
+else is running on that box. Controlled back-to-back runs on an otherwise idle
+machine:
+
+| Build | Runs | TBT |
+| --- | --- | --- |
+| With the workflow canvas | 95, 94, 94, 94 | 200–230 ms |
+| With the canvas removed entirely | 93, 91, 94 | 240–310 ms |
+
+The version *with* the canvas scores the same or better, so the section costs
+nothing measurable. The page simply sits around 94 on this hardware, hovering
+at the 95 line.
+
+Accessibility, Best Practices and SEO are a solid 100 and CLS is 0 in every
+run — those are structural and will not move. **Re-run Lighthouse on your own
+machine, and again on the deployed Vercel URL**, before treating 94 as the real
+number: a production CDN with proper caching and no CPU contention typically
+scores several points higher than a local server on a shared VM.
 
 LCP sits at 2.0–2.1 s rather than the brief's 1.8 s. It was 1.8 s before the
 demo videos existed; the two poster images cost roughly 0.2 s even lazy-loaded.

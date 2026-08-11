@@ -23,7 +23,10 @@ import { useInView } from '@/lib/useInView';
    it wider would shrink the type at exactly the moment it needs to be read.
 --------------------------------------------------------------------------- */
 
-const NODE_W = 170;
+/* 186 rather than a snug 170: the longest label needs ~101 units and this
+   leaves ~27 to spare, so renaming a node in content.ts does not silently push
+   its text out of the box. SVG text cannot wrap or shrink to fit. */
+const NODE_W = 186;
 const NODE_H = 60;
 const AGENT_W = 200;
 const AGENT_H = 76;
@@ -36,9 +39,10 @@ const PLACED: Placed[] = [
   { id: 'agent', x: 530, y: 132, w: AGENT_W, h: AGENT_H },
   { id: 'reply', x: 790, y: 140, w: NODE_W, h: NODE_H },
   { id: 'qualify', x: 320, y: 290, w: NODE_W, h: NODE_H },
-  { id: 'book', x: 545, y: 290, w: NODE_W, h: NODE_H },
+  /* Centred on the agent (x 630) so the trunk edge runs dead straight. */
+  { id: 'book', x: 537, y: 290, w: NODE_W, h: NODE_H },
   { id: 'sync', x: 790, y: 290, w: NODE_W, h: NODE_H },
-  { id: 'escalate', x: 545, y: 430, w: NODE_W, h: NODE_H },
+  { id: 'escalate', x: 537, y: 430, w: NODE_W, h: NODE_H },
 ];
 
 /**
@@ -50,17 +54,17 @@ const PLACED: Placed[] = [
  * edge renders as a broken line instead of a solid one once drawn.
  */
 const EDGES = [
-  { d: 'M280 170 H320', len: 40, delay: 0.35 },
-  { d: 'M490 170 H530', len: 40, delay: 0.55 },
+  { d: 'M296 170 H320', len: 30, delay: 0.35 },
+  { d: 'M506 170 H530', len: 30, delay: 0.55 },
   { d: 'M730 170 H790', len: 60, delay: 0.75 },
   // Agent fans out to the three parallel branches.
-  { d: 'M630 208 V236 Q630 250 616 250 H419 Q405 250 405 264 V290', len: 330, delay: 0.95 },
+  { d: 'M630 208 V236 Q630 250 616 250 H427 Q413 250 413 264 V290', len: 330, delay: 0.95 },
   { d: 'M630 208 V290', len: 82, delay: 1.05 },
-  { d: 'M630 208 V236 Q630 250 644 250 H861 Q875 250 875 264 V290', len: 330, delay: 1.15 },
+  { d: 'M630 208 V236 Q630 250 644 250 H869 Q883 250 883 264 V290', len: 330, delay: 1.15 },
   /* The human handoff is the "else" branch of the qualification decision, not
      something that happens after a meeting is booked. Routed from Qualify and
      across so the graph stays balanced. */
-  { d: 'M405 350 V386 Q405 400 419 400 H616 Q630 400 630 414 V430', len: 330, delay: 1.35 },
+  { d: 'M413 350 V386 Q413 400 427 400 H616 Q630 400 630 414 V430', len: 330, delay: 1.35 },
 ];
 
 /** Pulses reuse the edge paths, staggered so they never fire together. */
@@ -243,7 +247,7 @@ export function WorkflowCanvas() {
 
           {/* Edge label — makes the decision legible without a legend. */}
           <text
-            x="416"
+            x="424"
             y="380"
             fill="var(--color-muted)"
             fontFamily="var(--font-mono)"
@@ -307,11 +311,11 @@ export function WorkflowCanvas() {
                   x={slot.x + 46}
                   y={cy - 1}
                   fill="var(--color-text)"
-                  fontFamily="var(--font-mono)"
-                  fontSize="14"
-                  letterSpacing="0.06em"
+                  fontFamily="var(--font-sans)"
+                  fontSize="15"
+                  fontWeight="500"
                 >
-                  {node.title.toUpperCase()}
+                  {node.title}
                 </text>
                 <text
                   x={slot.x + 46}
@@ -344,7 +348,7 @@ export function WorkflowCanvas() {
               >
                 <Icon className={`h-5 w-5 shrink-0 ${isAgent ? 'text-accent' : 'text-muted'}`} />
                 <div>
-                  <p className="mono text-text">{node.title}</p>
+                  <p className="font-medium text-text">{node.title}</p>
                   <p className="text-sm text-muted">{node.meta}</p>
                 </div>
               </div>
