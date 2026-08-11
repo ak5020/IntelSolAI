@@ -1,25 +1,28 @@
 # Client logos
 
-Replace each placeholder with the real mark, keeping the filename:
+Generated from the source files in `public/images/` — do not hand-edit these.
 
-```
-customer-support-leaders.png
-nextgen-healthcare.png
-leadlaya.png
-finance-house.png
-wow-customer-support.png
-```
+| File | Source | Treatment |
+| --- | --- | --- |
+| `customer-support-leaders.png` | `customersupportleaders_logo.jpg` | white keyed out, trimmed |
+| `finance-house.png` | `finance_house_llc_logo.jpg` | white keyed out, trimmed |
+| `leadlaya.png` | `lead_laya_logo.jpg` | white keyed out, trimmed |
+| `wow-customer-support.png` | `wowcsservice_logo.jpg` | white keyed out, trimmed |
+| `nextgen-healthcare.png` | `nextgenhealthcareinc_logo.jpg` | **kept as-is** |
 
-**Format:** PNG with a transparent background (or SVG — update the path in
-`lib/content.ts` if you switch extension). Roughly 320×96, trimmed so the mark
-fills the frame with no baked-in padding.
+**Why NextGen is different.** Its turquoise is part of the mark — a navy wave on
+a brand-coloured tile, like an app icon. Keying it out would leave a navy shape
+that is invisible on a dark page and would be altering their logo rather than
+removing a backdrop.
 
-**These sit on a light tile, not on the page background.** Several of these
-marks are navy or black; a transparent PNG of a dark logo on a near-black page
-is invisible. The tile keeps every brand legible in its own colours rather than
-recolouring anyone's mark to white. If you would rather they sat directly on
-the dark background, they need supplying as white/monochrome versions — ask
-each company whether their brand guidelines allow it.
+**Why the others sit on a light tile.** Finance House is navy, LeadLaya has solid
+black blocks. Transparent or not, a dark mark on a near-black page cannot be
+seen. The tile keeps each brand in its own colours. Transparency still earns its
+place: it lets the mark blend into the tile instead of showing a hard white
+square inside it.
+
+The chips size themselves to whatever they hold, so a square mark gets a square
+chip and a wide one gets a wide chip. Replacing a logo needs no code change.
 
 **Before this section goes live:** confirm each company is happy to be named as
 a client and to have their logo used. See HANDOFF.md §1.4.

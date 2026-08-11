@@ -204,13 +204,24 @@ attribution: 'Name, Role — Company',
 
 Only publish what the client actually said and approved.
 
-**Logo files.** `public/logos/` currently holds five generated placeholders.
-Replace each with the real mark, keeping the filenames — see the README in that
-folder. They sit on a light tile rather than directly on the page background,
-because several of these marks are navy or black and a transparent PNG of a
-dark logo on a near-black page is invisible. If you want them on the dark
-background instead, you need white or monochrome versions, which each company's
-brand guidelines may or may not permit.
+**Logo files — done.** `public/logos/` now holds the processed marks, generated
+from the sources you committed to `public/images/`. Four had plain white
+backgrounds, which is keyed out to real alpha; each is then trimmed to its
+content box so nothing carries built-in padding. LeadLaya had 33px of dead space
+each side and Wow had 60px top and bottom, which is why they looked small.
+
+**NextGen is deliberately not keyed.** Its turquoise is the mark, not a backdrop
+— a navy wave on a brand-coloured tile, like an app icon. Removing it would
+leave a navy shape invisible on a dark page, and would be altering their logo
+rather than cleaning it up.
+
+The chips size themselves to whatever they hold, so the four square marks get
+square chips and Wow gets a wide one. Replacing any logo is a file swap with no
+code change. Regenerating from source is documented in `public/logos/README.md`.
+
+The `.jpg` sources stay in `public/images/` as the originals. They are not
+referenced by the site and could be moved out of `public/` if you would rather
+they were not served — nothing links to them.
 
 ---
 

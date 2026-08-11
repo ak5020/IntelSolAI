@@ -29,6 +29,41 @@ export function Clients() {
   const [edgeX, setEdgeX] = useState<number | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  /* Pending close, so moving between chips does not flicker the panel shut
+     and open again. */
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }, []);
+
+  /** True on devices with no real hover — phones, tablets, most touchscreens. */
+  const isCoarsePointer = () =>
+    typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
+
+  /**
+   * Closes shortly after the pointer leaves a logo.
+   *
+   * The delay exists so travelling from one chip to the next, or down onto the
+   * panel to actually read it, does not slam it shut mid-movement — whatever
+   * the pointer lands on next cancels the timer.
+   *
+   * Skipped entirely on touch. Chrome synthesises a mouse sequence around every
+   * tap that ends in mouseleave, so without this guard a tap opened the panel
+   * and the phantom leave shut it again 140ms later.
+   */
+  const closeSoon = useCallback(() => {
+    if (isCoarsePointer()) return;
+    cancelClose();
+    closeTimer.current = setTimeout(() => setActive(null), 140);
+  }, [cancelClose]);
+
+  /* Never leave a timer running behind an unmounted component. */
+  useEffect(() => cancelClose, [cancelClose]);
+
   /**
    * Opens a client and anchors the connector under the chip that was actually
    * pointed at — including the marquee's second copy, which sits somewhere
@@ -36,6 +71,7 @@ export function Clients() {
    * the strip has already stopped it, so the chip is not moving.
    */
   const open = useCallback((index: number, el: HTMLElement) => {
+    cancelClose();
     setActive(index);
     const wrap = sectionRef.current;
     if (!wrap) return;
@@ -44,9 +80,12 @@ export function Clients() {
     const centre = chip.left + chip.width / 2 - bounds.left;
     // Keep the edge inside the strip even when the chip is half off-screen.
     setEdgeX(Math.min(Math.max(centre, 24), bounds.width - 24));
-  }, []);
+  }, [cancelClose]);
 
-  const close = useCallback(() => setActive(null), []);
+  const close = useCallback(() => {
+    cancelClose();
+    setActive(null);
+  }, [cancelClose]);
 
   /**
    * Pointer-leave close, but only on devices that genuinely hover.
@@ -56,7 +95,7 @@ export function Clients() {
    * instantly on every phone.
    */
   const closeOnPointerLeave = useCallback(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) return;
+    if (isCoarsePointer()) return;
     close();
   }, [close]);
 
@@ -97,9 +136,13 @@ export function Clients() {
         aria-expanded={duplicate ? undefined : isActive}
         aria-controls={duplicate ? undefined : 'client-detail'}
         onMouseEnter={(e) => open(index, e.currentTarget)}
+        onMouseLeave={closeSoon}
         onFocus={(e) => open(index, e.currentTarget)}
         onClick={(e) => (isActive ? close() : open(index, e.currentTarget))}
-        className={`group relative flex h-[76px] w-[196px] shrink-0 items-center justify-center rounded-card border px-5 transition-[opacity,border-color,background-color,filter] duration-300 ${
+        /* Width is content-driven, not fixed: these marks are mostly square,
+           and a square logo centred in a wide box leaves obvious dead space
+           either side. The chip now takes its width from the logo it holds. */
+        className={`group relative flex h-[92px] w-auto shrink-0 items-center justify-center rounded-card border p-1.5 transition-[opacity,border-color,background-color,filter] duration-300 ${
           isActive
             ? 'border-accent bg-bg-elev-2'
             : 'border-line bg-bg-elev hover:border-line-strong'
@@ -111,7 +154,7 @@ export function Clients() {
           invisible — the tile keeps every brand legible without recolouring
           anyone's mark.
         */}
-        <span className="flex h-full w-full items-center justify-center rounded-btn bg-[#F4F6F8] px-3 py-2">
+        <span className="flex h-full items-center justify-center rounded-btn bg-[#F4F6F8] px-4 py-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={client.logo}
@@ -120,7 +163,7 @@ export function Clients() {
             height={48}
             loading="lazy"
             decoding="async"
-            className="max-h-[44px] w-auto max-w-full object-contain"
+            className="h-full max-h-[64px] w-auto rounded-[4px] object-contain"
             onError={(e) => {
               /* Until the real file is dropped in, fall back to the company
                  name rather than a broken-image icon. */
@@ -216,6 +259,8 @@ export function Clients() {
         <div className="shell">
           <div
             className="client-panel"
+            onMouseEnter={cancelClose}
+            onMouseLeave={closeSoon}
             data-open={activeClient ? 'true' : 'false'}
             id="client-detail"
             aria-live="polite"
