@@ -139,10 +139,12 @@ export function Clients() {
         onMouseLeave={closeSoon}
         onFocus={(e) => open(index, e.currentTarget)}
         onClick={(e) => (isActive ? close() : open(index, e.currentTarget))}
-        /* Width is content-driven, not fixed: these marks are mostly square,
-           and a square logo centred in a wide box leaves obvious dead space
-           either side. The chip now takes its width from the logo it holds. */
-        className={`group relative flex h-[92px] w-auto shrink-0 items-center justify-center rounded-card border p-1.5 transition-[opacity,border-color,background-color,filter] duration-300 ${
+        /* Every chip is the same box. The source marks have wildly different
+           native ratios (200×175, 133×141, 182×79), so sizing each chip to its
+           own logo left the row visibly ragged. A fixed box plus object-contain
+           inside keeps the five aligned on both axes while each mark still
+           scales to fill whatever room its ratio allows. */
+        className={`group relative flex h-[112px] w-[190px] shrink-0 items-center justify-center rounded-card border p-1.5 transition-[opacity,border-color,background-color,filter] duration-300 ${
           isActive
             ? 'border-accent bg-bg-elev-2'
             : 'border-line bg-bg-elev hover:border-line-strong'
@@ -154,7 +156,7 @@ export function Clients() {
           invisible — the tile keeps every brand legible without recolouring
           anyone's mark.
         */}
-        <span className="flex h-full items-center justify-center rounded-btn bg-[#F4F6F8] px-4 py-2">
+        <span className="flex h-full w-full items-center justify-center rounded-btn bg-[#F4F6F8] p-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={client.logo}
@@ -163,7 +165,7 @@ export function Clients() {
             height={48}
             loading="lazy"
             decoding="async"
-            className="h-full max-h-[64px] w-auto rounded-[4px] object-contain"
+            className="max-h-full max-w-full rounded-[4px] object-contain"
             onError={(e) => {
               /* Until the real file is dropped in, fall back to the company
                  name rather than a broken-image icon. */
@@ -202,7 +204,11 @@ export function Clients() {
       <div ref={sectionRef} onMouseLeave={closeOnPointerLeave}>
         <div className="marquee client-strip overflow-hidden">
           <div
-            className="marquee-track gap-4 px-2"
+            /* py-2 is load-bearing, not decoration: the strip clips with
+               overflow:hidden, and without it a chip's bottom edge lands on
+               exactly the clip boundary at a fractional y (measured 352.13px),
+               so the 1px active border was shaved off along the bottom. */
+            className="marquee-track gap-4 px-2 py-2"
             style={{
               animationName: 'marquee-left',
               animationDuration: '46s',
