@@ -1,10 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import { ClientLogotype } from '@/components/svg/ClientLogotypes';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Tag } from '@/components/ui/Tag';
 import { clients, clientsCopy } from '@/lib/content';
+
+/* useLayoutEffect warns when React renders on the server. The measurement it
+   guards has to happen before paint, so keep it in the browser and fall back to
+   the (never-run) effect version during SSR. */
+const useIsomorphicLayoutEffect =
+  typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 /**
  * S6b — client strip.
@@ -28,6 +35,47 @@ export function Clients() {
      null until a chip has been measured. */
   const [edgeX, setEdgeX] = useState<number | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  /*
+    How many times the five logos are repeated across the track.
+
+    Two is the intuitive answer and it is wrong on wide screens. The animation
+    slides the track left by exactly one copy; whatever is left has to fill the
+    viewport for the whole cycle. With two copies of a 1030px run on a 1440px
+    viewport, only 1046px remains — so the last ~380px sits empty until the
+    loop restarts, which is the blank right edge that shows up a few seconds in
+    and only refills once the run wraps around.
+
+    The rule is (copies − 1) × copyWidth ≥ stripWidth. Measured rather than
+    hard-coded because copyWidth depends on the rendered width of the
+    logotypes, which depends on the font actually being loaded.
+  */
+  const [copies, setCopies] = useState(2);
+
+  useIsomorphicLayoutEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+
+    const measure = () => {
+      const firstCopy = strip.querySelector<HTMLElement>('[data-marquee-copy="0"]');
+      const copyWidth = firstCopy?.getBoundingClientRect().width ?? 0;
+      const stripWidth = strip.clientWidth;
+      if (copyWidth <= 0 || stripWidth <= 0) return;
+      // +1 so a full copy is always queued up behind the visible run.
+      setCopies(Math.max(2, Math.ceil(stripWidth / copyWidth) + 1));
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(strip);
+    /* Web fonts land after first paint and change how wide the wordmarks are,
+       which changes the answer. */
+    void document.fonts?.ready.then(measure);
+
+    return () => observer.disconnect();
+  }, []);
 
   /* Pending close, so moving between chips does not flicker the panel shut
      and open again. */
@@ -139,45 +187,24 @@ export function Clients() {
         onMouseLeave={closeSoon}
         onFocus={(e) => open(index, e.currentTarget)}
         onClick={(e) => (isActive ? close() : open(index, e.currentTarget))}
-        /* Every chip is the same box. The source marks have wildly different
-           native ratios (200×175, 133×141, 182×79), so sizing each chip to its
-           own logo left the row visibly ragged. A fixed box plus object-contain
-           inside keeps the five aligned on both axes while each mark still
-           scales to fill whatever room its ratio allows. */
-        className={`group relative flex h-[112px] w-[190px] shrink-0 items-center justify-center rounded-card border p-1.5 transition-[opacity,border-color,background-color,filter] duration-300 ${
+        /*
+          A uniform box so the five align, but no tile and no fill at rest —
+          the logotypes are single-colour line art, so they sit straight on the
+          page background the way a client row should. The chip only becomes
+          visible furniture once it is the one being inspected.
+        */
+        className={`group relative flex h-[112px] w-[190px] shrink-0 items-center justify-center rounded-card border px-3 transition-[opacity,border-color,background-color,color] duration-300 ${
           isActive
-            ? 'border-accent bg-bg-elev-2'
-            : 'border-line bg-bg-elev hover:border-line-strong'
-        } ${dimmed ? 'opacity-25 grayscale' : 'opacity-100'}`}
+            ? 'border-accent bg-bg-elev-2 text-text'
+            : 'border-transparent text-muted hover:border-line-strong hover:text-text'
+        } ${dimmed ? 'opacity-40' : 'opacity-100'}`}
       >
-        {/*
-          Logos sit on a light chip. Several of these marks are navy or black,
-          and a transparent PNG of a dark logo on a near-black page is
-          invisible — the tile keeps every brand legible without recolouring
-          anyone's mark.
-        */}
-        <span className="flex h-full w-full items-center justify-center rounded-btn bg-[#F4F6F8] p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={client.logo}
-            alt={`${client.name} logo`}
-            width={160}
-            height={48}
-            loading="lazy"
-            decoding="async"
-            className="max-h-full max-w-full rounded-[4px] object-contain"
-            onError={(e) => {
-              /* Until the real file is dropped in, fall back to the company
-                 name rather than a broken-image icon. */
-              const img = e.currentTarget;
-              img.style.display = 'none';
-              img.insertAdjacentHTML(
-                'afterend',
-                `<span class="text-center text-[0.7rem] font-semibold leading-tight text-[#07090C]">${client.name}</span>`,
-              );
-            }}
-          />
+        {/* The lockup is split across several spans for typographic reasons, so
+            it is hidden from assistive tech and the name announced once. */}
+        <span aria-hidden="true">
+          <ClientLogotype id={client.id} name={client.name} />
         </span>
+        <span className="sr-only">{client.name}</span>
       </button>
     );
   };
@@ -202,7 +229,7 @@ export function Clients() {
       {/* Leaving this wrapper closes the panel — it spans the strip AND the
           panel, so travelling between them does not dismiss it. */}
       <div ref={sectionRef} onMouseLeave={closeOnPointerLeave}>
-        <div className="marquee client-strip overflow-hidden">
+        <div ref={stripRef} className="marquee client-strip overflow-hidden">
           <div
             /* py-2 is load-bearing, not decoration: the strip clips with
                overflow:hidden, and without it a chip's bottom edge lands on
@@ -211,7 +238,12 @@ export function Clients() {
             className="marquee-track gap-4 px-2 py-2"
             style={{
               animationName: 'marquee-left',
+              /* Per copy, not per lap: the track always travels exactly one
+                 copy, so adding copies keeps the logos moving at the same
+                 speed instead of speeding them up. */
               animationDuration: '46s',
+              /* One copy, as a share of the whole track — see the keyframes. */
+              ['--marquee-shift' as string]: `-${(100 / copies).toFixed(4)}%`,
               /*
                 Left undefined while nothing is open so the shared
                 `.marquee:hover` / `:focus-within` rule in globals.css can stop
@@ -229,10 +261,10 @@ export function Clients() {
               animationPlayState: active !== null ? 'paused' : undefined,
             }}
           >
-            {[0, 1].map((copy) => (
+            {Array.from({ length: copies }, (_, copy) => (
               <div key={copy} data-marquee-copy={copy} className="flex shrink-0 gap-4 pr-4">
                 {clients.map((client, i) => (
-                  <Chip key={`${copy}-${client.id}`} index={i} duplicate={copy === 1} />
+                  <Chip key={`${copy}-${client.id}`} index={i} duplicate={copy > 0} />
                 ))}
               </div>
             ))}

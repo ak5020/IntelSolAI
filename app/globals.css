@@ -226,19 +226,30 @@ html[data-reveal-ready='true'] [data-reveal][data-revealed='true'] {
    Keyframes
    =========================================================================== */
 
-/* Marquee: one duplicated track translated by exactly half its width. */
+/*
+   Marquee: the track holds N identical copies and slides left by exactly one
+   copy, at which point copy 2 sits where copy 1 started and the loop is
+   invisible.
+
+   `--marquee-shift` is that one-copy distance as a percentage of the whole
+   track: -50% for two copies, -25% for four, and so on. It is a variable
+   because two copies are only seamless while one copy is wider than the
+   viewport — below that, the track runs out and leaves a blank gap at the
+   right edge for the rest of the cycle. A track that needs more copies sets
+   this to match; anything that does not set it keeps the old two-copy value.
+*/
 @keyframes marquee-left {
   from {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(var(--marquee-shift, -50%));
   }
 }
 
 @keyframes marquee-right {
   from {
-    transform: translateX(-50%);
+    transform: translateX(var(--marquee-shift, -50%));
   }
   to {
     transform: translateX(0);
@@ -551,7 +562,9 @@ html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
     transform: none !important;
   }
 
-  .client-strip [data-marquee-copy='1'] {
+  /* Everything after the first copy exists only to make the loop seamless,
+     and the loop is switched off here. */
+  .client-strip [data-marquee-copy]:not([data-marquee-copy='0']) {
     display: none;
   }
 

@@ -309,7 +309,6 @@ export type Client = {
   id: string;
   name: string;
   sector: string;
-  logo: string;
   /** What we built. Factual, no invented metrics. */
   summary: string;
   tags: readonly string[];
@@ -323,7 +322,6 @@ export const clients: readonly Client[] = [
     id: 'customer-support-leaders',
     name: 'Customer Support Leaders',
     sector: 'Community & media',
-    logo: '/logos/customer-support-leaders.png',
     summary:
       'A community built on interviews with support leaders runs on a content pipeline, not a product roadmap. We automated the path from recording to published episode — transcription, show notes, scheduling and member follow-up — so a small team can hold a regular cadence without a producer chasing every step.',
     tags: ['Content pipeline', 'Member onboarding', 'Workflow automation'],
@@ -332,7 +330,6 @@ export const clients: readonly Client[] = [
     id: 'nextgen-healthcare',
     name: 'NextGen Healthcare',
     sector: 'Healthcare technology',
-    logo: '/logos/nextgen-healthcare.png',
     summary:
       'Ambulatory practices carry a heavy intake and scheduling load before a clinician sees anyone. We build the routing layer around it: intake triage, appointment reminders and support requests classified and sent to the right desk, with consent, access and retention rules agreed before a line of code is written.',
     tags: ['Intake triage', 'Appointment automation', 'Data privacy'],
@@ -341,7 +338,6 @@ export const clients: readonly Client[] = [
     id: 'leadlaya',
     name: 'LeadLaya',
     sector: 'Business development',
-    logo: '/logos/leadlaya.png',
     summary:
       'Bidding and proposal work is repetitive by nature and easy to lose track of. We automated the manual middle — lead capture and enrichment, first-draft proposals from a brief, follow-up sequences and CRM hygiene — so the team spends its time on the conversations rather than the admin around them.',
     tags: ['Lead generation', 'Proposal drafting', 'CRM automation'],
@@ -350,7 +346,6 @@ export const clients: readonly Client[] = [
     id: 'finance-house',
     name: 'Finance House',
     sector: 'Financial services · UAE',
-    logo: '/logos/finance-house.png',
     summary:
       'Financial services onboarding is document-heavy and audited. We automate the parts that are genuinely mechanical — document intake and classification, completeness checks, and status updates to the customer — while every decision point that carries risk stays with a named human, with a full trail behind it.',
     tags: ['Document processing', 'Onboarding', 'Human-in-the-loop'],
@@ -359,7 +354,6 @@ export const clients: readonly Client[] = [
     id: 'wow-customer-support',
     name: 'Wow Customer Support',
     sector: 'BPO · 24/7 support',
-    logo: '/logos/wow-customer-support.png',
     summary:
       'A BPO lives or dies on how much of the queue resolves without a person. We built the triage layer across email, live chat and social: classify, answer what is genuinely answerable, escalate the rest with context attached, and hold the ISO-aligned quality standards the operation is already audited against.',
     tags: ['Ticket triage', 'Live chat', 'Quality assurance'],
