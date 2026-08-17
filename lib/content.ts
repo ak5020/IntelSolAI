@@ -242,10 +242,12 @@ export const products = [
     title: 'AI WhatsApp Commerce Platform',
     body: 'Customers browse, ask questions, and check out inside WhatsApp. The agent handles product discovery, order status, and support, and hands off to a human the moment it should.',
     tags: ['WhatsApp Business API', 'Conversational Commerce', 'Order Automation'],
-    /* Native dimensions — a portrait phone recording. The player reserves the
-       box from these, so there is no layout shift and no cropping. */
-    width: 424,
-    height: 758,
+    /* Native dimensions — a desktop screen recording, 4 rows shorter than the
+       source because the top strip carried a capture watermark. The player
+       reserves the box from these, so there is no layout shift and no
+       cropping. */
+    width: 1280,
+    height: 572,
     poster: '/videos/whatsapp-commerce-poster.webp',
     sources: {
       mp4: '/videos/whatsapp-commerce.mp4',
@@ -254,7 +256,7 @@ export const products = [
     /* JSON-LD VideoObject fields. */
     description:
       'Demo of the IntelSol AI WhatsApp Commerce Platform: conversational product discovery, cart, checkout and order support handled by an AI agent inside WhatsApp.',
-    uploadDate: '2026-08-09',
+    uploadDate: '2026-08-16',
   },
   {
     id: 'lead-qualification',
