@@ -35,13 +35,16 @@ returns a generic error and logs the reason server-side.
 2. Create an App Password at https://myaccount.google.com/apppasswords
 3. Set:
 
+Generate the App Password on the **`intelagen01@gmail.com`** account, so that one
+address is the public address, the sender and the destination:
+
 ```
-CONTACT_TO_EMAIL=ak1107842@gmail.com
-CONTACT_FROM_EMAIL=ak1107842@gmail.com
+CONTACT_TO_EMAIL=intelagen01@gmail.com
+CONTACT_FROM_EMAIL=intelagen01@gmail.com
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=ak1107842@gmail.com
-SMTP_PASS=<the 16-character App Password>
+SMTP_USER=intelagen01@gmail.com
+SMTP_PASS=<the 16-character App Password from intelagen01@gmail.com>
 NEXT_PUBLIC_CONTACT_EMAIL=intelagen01@gmail.com
 NEXT_PUBLIC_SITE_URL=https://intelsolai.com
 ```
@@ -49,13 +52,22 @@ NEXT_PUBLIC_SITE_URL=https://intelsolai.com
 **Use the App Password, not your Google password** — Google rejects the latter
 over SMTP.
 
-**Set `CONTACT_FROM_EMAIL` to the same Gmail address.** Gmail rewrites the
-`From` header to whichever account authenticated, so setting it to
-`website@intelsolai.com` will not stick unless you have added that as a
-verified "Send mail as" alias in Gmail → Settings → Accounts. The practical
-consequence is that the auto-reply your leads receive arrives from a personal
-Gmail address, which reads as less credible on a vendor site. That is the main
-reason to move to Option B once DNS is sorted.
+**These three must agree.** Gmail rewrites the `From` header to whichever account
+authenticated, so `SMTP_USER`, `SMTP_PASS` and `CONTACT_FROM_EMAIL` have to
+belong to the same mailbox. If you keep an App Password issued by
+`ak1107842@gmail.com` while setting `CONTACT_FROM_EMAIL=intelagen01@gmail.com`,
+the header is silently rewritten back and your leads get an auto-reply from an
+address that is not on the site.
+
+`CONTACT_TO_EMAIL` is the exception — it is only a destination, so it can be any
+address regardless of who authenticates. Keeping the old App Password and
+setting just `CONTACT_TO_EMAIL=intelagen01@gmail.com` does work; it simply means
+enquiries arrive at intelagen01 while auto-replies still go out from
+ak1107842, which is why the block above moves everything to one account.
+
+The remaining wrinkle is that the auto-reply still comes from a personal Gmail
+address rather than `@intelsolai.com`, which reads as less credible on a vendor
+site. That is the reason to move to Option B once DNS is sorted.
 
 #### Option B — Resend (better long-term)
 
@@ -408,8 +420,14 @@ moving the contact endpoint to a standalone serverless function.
   but the notification succeeds, the visitor still sees success — the enquiry
   landed, which is what matters. Provider selection verified for all three cases:
   SMTP only, Resend only, and both set (SMTP wins).
-- **Recipient address absent from the entire build output** —
-  `grep -r "ak1107842" .next/` returns nothing.
+- **`CONTACT_TO_EMAIL` is read server-side only** and never reaches the client
+  bundle. This was originally verifiable by grepping the build for the recipient
+  address; that check no longer proves anything now that the destination and the
+  publicly displayed address are the same mailbox, since
+  `NEXT_PUBLIC_CONTACT_EMAIL` puts `intelagen01@gmail.com` in the bundle on
+  purpose. What still holds, and is what actually matters, is that no `SMTP_*`
+  value, no `RESEND_API_KEY` and no server-only variable appears in
+  `.next/static` — only the `NEXT_PUBLIC_*` pair, which is public by design.
 - **Keyboard**: skip link is first focusable; 90 tab stops with no trap; tab strip
   responds to Arrow/Home/End; accordion toggles on Enter with one panel open.
 - **Mobile nav**: opens, locks body scroll, closes on Escape, restores scroll.
