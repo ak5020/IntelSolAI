@@ -570,14 +570,22 @@ export const serviceOptions = [
   'Workflow & Process Automation',
   'CRM, Sales & Marketing Automation',
   'RAG & LLM Integrations',
+  'Custom Development',
   'Not sure yet',
 ] as const;
 
+/*
+  These strings are the validation rule, not just the labels: contactSchema
+  builds a Zod enum straight from this array, so an option that is not listed
+  here is rejected server-side. Editing this list is all that is needed to
+  change the dropdown — there is no second place to keep in sync.
+*/
 export const budgetOptions = [
-  'Under $5k',
-  '$5k–15k',
-  '$15k–50k',
-  '$50k+',
+  'Under $500',
+  '$500–$1k',
+  '$1k–$2k',
+  '$2k–$5k',
+  '$5k+',
   'Not sure yet',
 ] as const;
 

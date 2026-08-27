@@ -145,7 +145,7 @@ export function ContactForm() {
           id="name"
           label="Full name"
           autoComplete="name"
-          placeholder="Ayesha Khan"
+          placeholder="Jack Turner"
           value={values.name}
           onChange={set('name')}
           onBlur={validateField('name')}
