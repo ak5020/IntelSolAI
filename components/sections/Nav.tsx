@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { Logo } from '@/components/svg/Logo';
+import { BookCall } from '@/components/ui/BookCall';
 import { navLinks, primaryCta } from '@/lib/content';
 import { useScrollSpy } from '@/lib/useScrollSpy';
 
@@ -94,12 +95,11 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2">
-          <a
-            href={primaryCta.href}
-            className="hidden min-h-[44px] items-center rounded-btn bg-accent px-4 py-2.5 text-[0.9rem] font-medium text-accent-ink transition-colors duration-150 hover:bg-[#57e6cd] sm:inline-flex"
-          >
-            {primaryCta.label}
-          </a>
+          <BookCall
+            url={primaryCta.href}
+            label={primaryCta.label}
+            className="hidden !min-h-[44px] !px-4 !py-2.5 !text-[0.9rem] sm:inline-flex"
+          />
 
           {/* Hamburger → close, morphed with transforms on two lines rather
               than swapping two different icons. */}
@@ -174,13 +174,12 @@ export function Nav() {
           ))}
         </ul>
         <div className="shell pb-10">
-          <a
-            href={primaryCta.href}
-            onClick={() => setMenuOpen(false)}
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-btn bg-accent px-5 py-3 font-medium text-accent-ink"
-          >
-            {primaryCta.label}
-          </a>
+          <BookCall
+            url={primaryCta.href}
+            label={primaryCta.label}
+            className="w-full"
+            onActivate={() => setMenuOpen(false)}
+          />
         </div>
     </div>
     </>

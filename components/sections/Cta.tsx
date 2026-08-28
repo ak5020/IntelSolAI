@@ -1,8 +1,9 @@
 import { LinkedInIcon } from '@/components/svg/icons';
 import { OrbitGraphic } from '@/components/svg/OrbitGraphic';
+import { BookCall } from '@/components/ui/BookCall';
 import { CopyEmail } from '@/components/ui/CopyEmail';
 import { Eyebrow } from '@/components/ui/Eyebrow';
-import { contact, site } from '@/lib/content';
+import { contact, primaryCta, site } from '@/lib/content';
 
 import { ContactForm } from './ContactForm';
 
@@ -39,6 +40,11 @@ export function Cta() {
           <ul className="mt-9 flex flex-col gap-4">
             <li>
               <CopyEmail />
+            </li>
+            {/* The other door. Someone who scrolled to the form but would
+                rather talk should not have to go back up to the header. */}
+            <li className="pt-2">
+              <BookCall url={primaryCta.href} label={primaryCta.label} variant="ghost" />
             </li>
             <li>
               <a

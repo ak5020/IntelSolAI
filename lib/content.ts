@@ -33,10 +33,24 @@ export const navLinks = [
   { label: 'Process', href: '#process' },
   { label: 'Industries', href: '#industries' },
   { label: 'FAQ', href: '#faq' },
+  { label: 'Contact', href: '#contact' },
 ] as const;
 
-/** Primary CTA. No booking tool yet, so it scrolls to the contact form. */
-export const primaryCta = { label: 'Book a free AI audit', href: '#contact' } as const;
+/**
+ * The two calls to action, kept deliberately separate.
+ *
+ * `primaryCta` books time — it opens Calendly, for someone ready to talk now.
+ * `contactCta` opens the form, for someone who would rather describe the
+ * problem first. Pointing both at the same place would mean either asking a
+ * stranger to put 30 minutes in the calendar with no context, or burying the
+ * scheduler behind a form. They are different intents and get different doors.
+ */
+export const primaryCta = {
+  label: 'Book a free AI audit',
+  href: 'https://calendly.com/intelagen01/30min',
+} as const;
+
+export const contactCta = { label: 'Send an enquiry', href: '#contact' } as const;
 
 // ---------------------------------------------------------------------------
 // S2 — Hero
@@ -48,7 +62,7 @@ export const hero = {
   headingLines: ['Ship AI that', 'pays for itself'],
   sub: 'IntelSol builds agentic AI systems, voice agents, and workflow automation for startups, fintech, and B2B SaaS — engineered around your existing processes and measured against real business outcomes.',
   ctaPrimary: primaryCta,
-  ctaSecondary: { label: 'See it working', href: '#products' },
+  ctaSecondary: contactCta,
   pills: [
     'Agentic AI',
     'AI Agents',

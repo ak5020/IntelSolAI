@@ -342,13 +342,49 @@ actually a video.
 | Decision | What I did | How to change it |
 | --- | --- | --- |
 | **Accent colour** | Used the logo mint `#3FDCC0` instead of the brief's `#5B7CFA`. The blue clashed with your mint logo, and white text on it fails WCAG AA at 3.7:1. | `--color-accent` in `app/globals.css` |
-| **Booking CTA** | You said no booking tool yet, so every "Book a free AI audit" button scrolls to the contact form. | `primaryCta.href` in `lib/content.ts` |
+| **Two CTAs, not one** | "Book a free AI audit" opens Calendly; "Send an enquiry" opens the contact form. Pointing both at one place would mean either asking a stranger for 30 minutes with no context, or burying the scheduler behind a form. | `primaryCta` / `contactCta` in `lib/content.ts` |
 | **Logo** | Hand-authored as SVG from the PNG you posted (`components/svg/Logo.tsx` + `public/images/logo.svg`). Close, but traced by eye. | Send the original vector and I'll swap it in |
 | **Public email** | The page shows `intelagen01@gmail.com`. Enquiries still route to your Gmail. | `NEXT_PUBLIC_CONTACT_EMAIL` |
 | **LinkedIn URL** | Guessed `linkedin.com/company/intelsolai`. **Verify this resolves.** | `site.linkedin` in `lib/content.ts` |
 | **Pulse animation** | Used CSS `offset-path` instead of SVG `<animateMotion>`. SMIL runs on the main thread; ten animated paths above the fold would have cost the mobile performance target. | `components/svg/OrbitGraphic.tsx` |
 | **Mail provider** | Made it switchable rather than Resend-only, so Gmail SMTP works today without DNS. | `lib/mailer.ts`, env vars |
 | **OG image** | Generated at build time by `next/og` (`app/opengraph-image.tsx`) rather than a static PNG, so it stays in sync with the brand tokens. | Edit that file, or drop in a static PNG |
+
+
+### 2.1 How the Calendly button works
+
+`https://calendly.com/intelagen01/30min`, opened as a modal over the page.
+
+**Nothing from Calendly loads until someone shows intent.** Their standard embed
+snippet pulls ~90KB of third-party CSS and JS on every page view, from a third
+-party origin, whether or not anyone books — paid for by every visitor to fund a
+click a small fraction of them make. Instead the assets are fetched on the first
+hover or focus of the button, so the widget is usually ready by the time the
+click lands, and on the click itself otherwise. Measured after wiring it up:
+third-party blocking time 0ms, performance unchanged.
+
+That also means **no Calendly cookie is set on anyone who never tries to book**,
+which matters if you add a cookie banner later — the third party only appears
+once the visitor has actively asked for it.
+
+**It degrades rather than breaks.** The button is a real link to the booking
+page underneath the JavaScript. If Calendly's assets fail to load, the click
+opens that page in a new tab instead of a modal; ctrl/cmd-click always opens the
+tab and never the modal, as the href promises. Verified all three paths.
+
+**Two things to do on Calendly's side:**
+
+- Rename the event. It is currently their default "30 Minute Meeting", which is
+  what appears on the booking page, the confirmation email and the calendar
+  invite. "Free AI Audit Call" would match the button someone just clicked.
+- Decide whether you want qualifying questions on the booking form. Calendly can
+  ask "what are you trying to automate?" before confirming, which gets you the
+  same context the contact form collects. Without it you will walk into calls
+  knowing only a name and an email.
+
+If you would rather the button collected name, email and the problem *first* and
+only then revealed the picker, that is a different build — say so and I will do
+it. The current behaviour is the direct one you asked for.
 
 ---
 

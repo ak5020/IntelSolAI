@@ -5,6 +5,7 @@ import { ArrowRightIcon, CheckIcon } from '@/components/svg/icons';
 import { Logo } from '@/components/svg/Logo';
 import { SeoFlow } from '@/components/svg/SeoFlow';
 import { Footer } from '@/components/sections/Footer';
+import { BookCall } from '@/components/ui/BookCall';
 import { Button } from '@/components/ui/Button';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Reveal } from '@/components/ui/Reveal';
@@ -12,7 +13,7 @@ import { ScrollTop } from '@/components/ui/ScrollTop';
 import { Tag } from '@/components/ui/Tag';
 import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { type CaseStudy, caseStudies, caseStudyBySlug } from '@/lib/caseStudies';
-import { primaryCta, site } from '@/lib/content';
+import { contactCta, primaryCta, site } from '@/lib/content';
 
 /* ---------------------------------------------------------------------------
    Case study detail pages — /lead-qualification, /whatsapp-commerce, etc.
@@ -165,9 +166,11 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
           <a href="/" aria-label="IntelSolAI home" className="shrink-0">
             <Logo />
           </a>
-          <Button href={`/#${primaryCta.href.replace('#', '')}`} className="hidden sm:inline-flex">
-            {primaryCta.label}
-          </Button>
+          <BookCall
+            url={primaryCta.href}
+            label={primaryCta.label}
+            className="hidden sm:inline-flex"
+          />
         </div>
       </header>
 
@@ -328,9 +331,9 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
               impact, and tell you honestly whether it&apos;s worth building.
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <Button href="/#contact">{primaryCta.label}</Button>
-              <Button href="/#case-studies" variant="ghost">
-                See all case studies
+              <BookCall url={primaryCta.href} label={primaryCta.label} />
+              <Button href={`/${contactCta.href}`} variant="ghost">
+                {contactCta.label}
               </Button>
             </div>
           </div>

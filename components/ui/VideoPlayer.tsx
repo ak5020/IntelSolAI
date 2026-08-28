@@ -186,7 +186,7 @@ export function VideoPlayer({ title, width, height, poster, sources }: Props) {
           <p className="mono text-muted">Demo unavailable</p>
           <p className="max-w-sm text-sm text-body">
             We couldn&apos;t play the {title} demo here.{' '}
-            <a href="#contact" className="text-accent underline underline-offset-4">
+            <a href="/#contact" className="text-accent underline underline-offset-4">
               Ask us for a live walkthrough
             </a>{' '}
             or email{' '}

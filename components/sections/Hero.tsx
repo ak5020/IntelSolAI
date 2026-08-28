@@ -1,4 +1,5 @@
 import { OrbitGraphic } from '@/components/svg/OrbitGraphic';
+import { BookCall } from '@/components/ui/BookCall';
 import { Button } from '@/components/ui/Button';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Tag } from '@/components/ui/Tag';
@@ -46,7 +47,7 @@ export function Hero() {
           </p>
 
           <div className="hero-in mt-9 flex flex-wrap gap-3" style={step(4)}>
-            <Button href={hero.ctaPrimary.href}>{hero.ctaPrimary.label}</Button>
+            <BookCall url={hero.ctaPrimary.href} label={hero.ctaPrimary.label} />
             <Button href={hero.ctaSecondary.href} variant="ghost">
               {hero.ctaSecondary.label}
             </Button>
