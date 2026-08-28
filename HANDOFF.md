@@ -283,6 +283,60 @@ they were not served — nothing links to them.
 
 ---
 
+### 1.5 Case study pages — what is claimed, and what is not
+
+Four case studies ship as their own pages, linked from the landing page and
+listed in the sitemap:
+
+| URL | Subject | Visual |
+| --- | --- | --- |
+| `/lead-qualification` | AI Lead Qualification & Cold Calling Voice Agent | demo recording |
+| `/whatsapp-commerce` | AI WhatsApp Commerce & Customer Support Agent | demo recording |
+| `/demand-iq-hubspot` | Demand IQ → HubSpot CRM Automation | hand-drawn workflow |
+| `/seo-automation` | AI-Powered SEO FAQ Automation | hand-drawn workflow |
+
+**There is not one invented number on any of them.** You said these pages are
+what you will run ads against, which raises the accuracy bar rather than
+lowering it. Every claim describes what the system does and is traceable to
+either the demo recording on the page or your own description of the build. The
+"Key results" sections are capability statements, not measured outcomes — for
+example "every call reaches the CRM with its transcript attached", which the
+recording demonstrates, rather than "38% more meetings booked", which nobody
+has measured.
+
+That is a deliberate trade. A results block with real figures converts better
+than one without, and the moment you have a client willing to sign off on
+numbers — calls handled, tickets deflected, hours saved — send them over and I
+will put them in. Until then, an ad that cites a figure you cannot evidence is
+the fastest way to lose a deal at the moment a buyer asks how it was
+calculated, and in the UK, US and EU it is also an advertising compliance
+problem. `results` in `lib/caseStudies.ts` is where they go.
+
+**Two things to check before the ads run:**
+
+- *Client permission.* Demand IQ, HubSpot, AlsoAsked and n8n are named as
+  tools, which is fine. But the two demo recordings show a real client's data,
+  and §1.3 above still applies to both — including the customer phone number in
+  the WhatsApp ops dashboard.
+- *The workflow diagrams are redrawn, not screenshots.* Your Zapier and n8n
+  screenshots are light-mode PNGs; dropped onto a dark page they would need a
+  white card to be legible, which is what made the client logos look like
+  stickers before they were redrawn. Both workflows are now hand-authored SVG —
+  same node structure, same step numbers, same branch labels, but native to the
+  page, animated, crisp at any zoom and weighing nothing. Check them against
+  your originals: `components/svg/DemandIqFlow.tsx` and `SeoFlow.tsx`. The node
+  labels are shortened to fit ("Get report + fields" for "Get Prospect Report
+  and Custom Fields"); tell me if any of them misrepresents a step.
+
+**Structured data was re-split when these pages were added.** The root layout
+had been emitting `FAQPage` and the product `VideoObject`s on every page, which
+would have put FAQ markup on four pages with no FAQ on them — a
+markup-versus-content mismatch that costs the rich result it was meant to earn.
+Site-wide entities (Organization, WebSite, ProfessionalService) stayed in the
+layout; page-specific ones moved to the page that owns them. Each case study now
+emits `Article` + `BreadcrumbList`, plus a `VideoObject` only where there is
+actually a video.
+
 ## 2. Things I decided on your own behalf
 
 | Decision | What I did | How to change it |

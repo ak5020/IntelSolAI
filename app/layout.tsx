@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono, Public_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { faqs, products, services, site } from '@/lib/content';
+import { services, site } from '@/lib/content';
 
 import './globals.css';
 
@@ -74,8 +74,15 @@ export const viewport = {
 };
 
 /* ---------------------------------------------------------------------------
-   Structured data — Organization, ProfessionalService, FAQPage, WebSite, and
-   a VideoObject for each product demo.
+   Structured data — SITE-WIDE ONLY.
+
+   Organization, WebSite and ProfessionalService describe the business, so they
+   are true on every page and belong here. Anything that describes THIS page's
+   content does not: FAQPage and the product VideoObjects moved to app/page.tsx
+   when the case-study routes were added, because emitting them from the layout
+   put FAQ markup on pages with no FAQ on them and video markup on pages with
+   no video. Google treats that as a mismatch between markup and content, which
+   costs the rich result it was meant to earn.
 --------------------------------------------------------------------------- */
 
 function jsonLd() {
@@ -138,23 +145,6 @@ function jsonLd() {
           })),
         },
       },
-      {
-        '@type': 'FAQPage',
-        '@id': `${site.url}/#faq`,
-        mainEntity: faqs.map((faq) => ({
-          '@type': 'Question',
-          name: faq.q,
-          acceptedAnswer: { '@type': 'Answer', text: faq.a },
-        })),
-      },
-      ...products.map((product) => ({
-        '@type': 'VideoObject',
-        name: `${product.title} — product demo`,
-        description: product.description,
-        thumbnailUrl: [`${site.url}${product.poster}`],
-        uploadDate: product.uploadDate,
-        contentUrl: `${site.url}${product.sources.mp4}`,
-      })),
     ],
   };
 }
