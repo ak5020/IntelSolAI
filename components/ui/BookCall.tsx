@@ -62,6 +62,35 @@ function loadCalendly(): Promise<void> {
   return loader;
 }
 
+/**
+ * Marks the document while Calendly's overlay is up, so the page behind it can
+ * stop animating (see the `data-modal-open` rules in globals.css).
+ *
+ * Calendly gives no close callback, so the flag is cleared by watching for its
+ * overlay leaving the DOM — which covers every way it can be dismissed: the
+ * close button, the backdrop, and Escape.
+ */
+function markModalOpen(): void {
+  const root = document.documentElement;
+  root.dataset.modalOpen = 'true';
+
+  const clear = () => {
+    delete root.dataset.modalOpen;
+    observer.disconnect();
+  };
+
+  const observer = new MutationObserver(() => {
+    if (!document.querySelector('.calendly-overlay')) clear();
+  });
+  observer.observe(document.body, { childList: true });
+
+  /* Belt and braces: if the overlay never appears at all, do not leave the
+     page frozen. */
+  window.setTimeout(() => {
+    if (!document.querySelector('.calendly-overlay')) clear();
+  }, 15000);
+}
+
 type Props = {
   url: string;
   label: string;
@@ -99,6 +128,7 @@ export function BookCall({ url, label, variant = 'primary', className, onActivat
       loadCalendly()
         .then(() => {
           window.Calendly?.initPopupWidget({ url });
+          markModalOpen();
         })
         .catch(() => {
           failed.current = true;

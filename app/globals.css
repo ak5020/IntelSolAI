@@ -572,3 +572,62 @@ html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
     scroll-snap-align: center;
   }
 }
+
+/* ===========================================================================
+   Calendly overlay
+   ---------------------------------------------------------------------------
+   Calendly's widget.css is injected into <head> at runtime, i.e. AFTER this
+   stylesheet, so on equal specificity theirs wins. `!important` is the honest
+   tool here: these are deliberate overrides of third-party CSS we do not
+   control, not a shortcut around our own cascade.
+   =========================================================================== */
+
+/*
+   Their popup renders its own scrollbar over the dark page, which reads as a
+   stray browser artefact rather than part of the modal. Hidden, not disabled —
+   the region still scrolls by wheel, trackpad, touch and keyboard on short
+   viewports, it just does not paint a light-grey bar across the design.
+*/
+.calendly-overlay,
+.calendly-popup,
+.calendly-popup-content {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.calendly-overlay::-webkit-scrollbar,
+.calendly-popup::-webkit-scrollbar,
+.calendly-popup-content::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/*
+   One loader, in the middle of the screen. Their spinner sits at the top of
+   the popup while the iframe loads, which puts it nowhere near where the eye
+   is waiting.
+*/
+.calendly-overlay .calendly-spinner {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  transform: none !important;
+}
+
+/*
+   Freeze the page underneath while the modal is open.
+
+   With the background dimmed, the hero's travelling pulses and the marquees
+   are the only things still moving, and a lone drifting dot behind a loading
+   overlay reads as a second spinner. Pausing them leaves exactly one moving
+   element on screen — and stops paying for background animation while an
+   iframe is loading.
+*/
+html[data-modal-open='true'] [data-pulse],
+html[data-modal-open='true'] .marquee-track {
+  animation-play-state: paused !important;
+}
