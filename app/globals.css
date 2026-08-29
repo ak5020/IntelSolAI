@@ -69,6 +69,13 @@
 }
 
 html {
+  /*
+     Without this the browser paints its default LIGHT scrollbar and native
+     controls on a near-black page — a pale bar with arrow buttons down the
+     right edge, which is what it looks like when a third-party modal dims
+     everything behind it. One declaration fixes it everywhere, not just there.
+  */
+  color-scheme: dark;
   scroll-behavior: smooth;
   /* Anchor targets clear the fixed header instead of hiding behind it. */
   scroll-padding-top: 88px;
@@ -588,16 +595,16 @@ html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
    the region still scrolls by wheel, trackpad, touch and keyboard on short
    viewports, it just does not paint a light-grey bar across the design.
 */
-.calendly-overlay,
-.calendly-popup,
-.calendly-popup-content {
+html body .calendly-overlay,
+html body .calendly-popup,
+html body .calendly-popup-content {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-.calendly-overlay::-webkit-scrollbar,
-.calendly-popup::-webkit-scrollbar,
-.calendly-popup-content::-webkit-scrollbar {
+html body .calendly-overlay::-webkit-scrollbar,
+html body .calendly-popup::-webkit-scrollbar,
+html body .calendly-popup-content::-webkit-scrollbar {
   width: 0 !important;
   height: 0 !important;
   display: none !important;
@@ -608,7 +615,7 @@ html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
    the popup while the iframe loads, which puts it nowhere near where the eye
    is waiting.
 */
-.calendly-overlay .calendly-spinner {
+html body .calendly-overlay .calendly-spinner {
   position: fixed !important;
   inset: 0 !important;
   display: flex !important;
@@ -630,4 +637,14 @@ html[data-reveal-ready='true'] .tab-panel[data-active='false'] {
 html[data-modal-open='true'] [data-pulse],
 html[data-modal-open='true'] .marquee-track {
   animation-play-state: paused !important;
+}
+
+/*
+   Calendly does not lock the page, so its own scrollbar stays on screen beside
+   the modal and the content scrolls behind it. Locking here removes the bar
+   for the duration and makes the modal behave like a modal.
+*/
+html[data-modal-open='true'],
+html[data-modal-open='true'] body {
+  overflow: hidden !important;
 }
