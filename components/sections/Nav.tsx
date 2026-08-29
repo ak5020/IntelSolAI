@@ -98,7 +98,13 @@ export function Nav() {
           <BookCall
             url={primaryCta.href}
             label={primaryCta.label}
-            className="hidden !min-h-[44px] !px-4 !py-2.5 !text-[0.9rem] sm:inline-flex"
+            /* !hidden / sm:!inline-flex, not the bare utilities: Button's base
+               classes already set inline-flex unconditionally, so a
+               non-important `hidden` here has equal specificity and loses to
+               it depending on Tailwind's internal rule order — which is
+               exactly what let this button render at every width, including
+               the phone sizes it was meant to disappear at. */
+            className="!hidden !min-h-[44px] !px-4 !py-2.5 !text-[0.9rem] sm:!inline-flex"
           />
 
           {/* Hamburger → close, morphed with transforms on two lines rather
