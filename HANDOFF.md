@@ -386,6 +386,52 @@ If you would rather the button collected name, email and the problem *first* and
 only then revealed the picker, that is a different build — say so and I will do
 it. The current behaviour is the direct one you asked for.
 
+### 2.2 Google Analytics (GA4)
+
+Wired to measurement ID `G-MQHJ4LMT0F`, on every page — the landing page and
+all four case-study pages — via `@next/third-parties/google`'s `GoogleAnalytics`
+component in `app/layout.tsx`, rather than pasting the raw `<script>` tags
+Google's setup screen gives you.
+
+**Same tag, loaded better.** Google's own snippet goes in `<head>` and loads
+eagerly, competing with the hero for bandwidth on the connection that matters
+most for the page's largest paint. The Next.js component loads it with
+`strategy="afterInteractive"` — after the page is already interactive, not
+blocking the content a visitor came for. Verified: identical Lighthouse
+performance with and without it once the one confounding factor below is
+accounted for.
+
+**One instance, one place.** It lives once in the root layout, which is what
+puts it on every route without risking the duplicate-tag mistake Google's own
+instructions warn against — I checked the rendered case-study pages and each
+carries exactly one `gtag/js` script tag, not one inherited from the layout
+plus a second added anywhere else.
+
+**The ID is public, not a secret.** `NEXT_PUBLIC_GA_ID` in `.env.local` and
+`.env.example`, with the ID you gave as the fallback if the variable is ever
+absent. Unlike `CONTACT_TO_EMAIL` or `SMTP_PASS`, a GA measurement ID is meant
+to appear in every page's HTML — there is nothing to protect by keeping it out
+of the repo, so it does not need the same handling as the mail credentials.
+
+**A testing caveat, not a site defect.** In this sandbox,
+`googletagmanager.com` is blocked at the network level (the same restriction
+that affected Calendly's assets — see §2.1). With the block in place, Chrome
+logs a console error for the failed request, which knocks Lighthouse's
+best-practices score from 100 to 96 purely because "errors in console" is one
+of its checks. I confirmed this is the sandbox and not the integration: I
+removed the `GoogleAnalytics` line, rebuilt, and best-practices went straight
+back to 100 — then restored it. On the live site, where that domain is
+reachable, there is nothing to log and no reason to expect the score to move.
+Worth one check after deploy: open DevTools → Network on the live site and
+confirm a request to `gtag/js?id=G-MQHJ4LMT0F` returns 200, and that Google
+Analytics' **Realtime** report shows a visit when you load the page yourself.
+
+**Not addressed:** cookie consent. GA4 sets cookies to distinguish visitors,
+and this site has no consent banner. If EU/UK visitors matter to you, that is
+a compliance gap independent of anything above — the same category of decision
+as the placeholder statistics in §1.2, not something I would silently work
+around by disabling tracking myself.
+
 ---
 
 ## 3. Placeholders still in the page

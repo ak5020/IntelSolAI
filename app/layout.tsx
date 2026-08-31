@@ -1,8 +1,21 @@
+import { GoogleAnalytics } from '@next/third-parties/google';
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono, Public_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { services, site } from '@/lib/content';
+
+/**
+ * Google Analytics (GA4) measurement ID.
+ *
+ * Read from the environment rather than hardcoded so a staging deploy can run
+ * with analytics off, or point at a different property, without a code
+ * change. Falls back to the ID the client supplied, since this is a public
+ * identifier (it is meant to appear in every page's HTML) rather than a
+ * secret — unlike CONTACT_TO_EMAIL or SMTP_PASS, there is nothing to protect
+ * by keeping it out of the repo.
+ */
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID ?? 'G-MQHJ4LMT0F';
 
 import './globals.css';
 
@@ -179,6 +192,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </a>
         <div className="noise" aria-hidden="true" />
         {children}
+        {/*
+          Renders Google's gtag.js via next/script under the hood, which is
+          why this isn't the raw <script> tags from the snippet Google gives
+          you: their version loads eagerly in <head> and competes with the
+          hero for bandwidth on the connection that matters most for LCP.
+          `@next/third-parties` uses strategy="afterInteractive", so it loads
+          after the page is already interactive instead of blocking the
+          content a visitor is there to see — same tag, same G- ID, better
+          loading behaviour.
+
+          One instance, in the root layout, is what puts it on every route —
+          the landing page and all four case-study pages — without risking
+          the duplicate-tag mistake Google's own instructions warn against.
+        */}
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
       </body>
     </html>
   );

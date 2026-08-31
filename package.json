@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@next/third-parties": "^15.5.23",
     "next": "^15.5.23",
     "nodemailer": "^6.9.16",
     "react": "19.1.1",
