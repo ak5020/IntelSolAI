@@ -100,7 +100,7 @@ function jsonLd(study: CaseStudy) {
               name: `${study.media.title} — demo`,
               description: study.meta.description,
               thumbnailUrl: [`${site.url}${study.media.poster}`],
-              uploadDate: '2026-08-16',
+              uploadDate: study.media.uploadDate,
               contentUrl: `${site.url}${study.media.sources.mp4}`,
             },
           ]
@@ -148,7 +148,22 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
   const study = caseStudyBySlug(slug);
   if (!study) return null;
 
-  const related = caseStudies.filter((other) => other.slug !== study.slug);
+  /* Three related studies, taken as the next three in the array, wrapping
+     round. Capped at three because the rail is a 3-column grid and a fourth
+     card would sit alone on a second row.
+
+     Wrapping rather than "the first three that aren't this one" matters for
+     internal linking: with five studies, taking the first three would mean the
+     last study in the array is never linked from any other page — the newest
+     case study, the one most likely to need the link equity, would be the only
+     orphan. Rotating gives every study exactly three inbound links, and it
+     stays deterministic per page rather than shuffling between builds. */
+  const index = caseStudies.findIndex((other) => other.slug === study.slug);
+  const related = [1, 2, 3]
+    .map((offset) => caseStudies[(index + offset) % caseStudies.length])
+    /* The modulo keeps the index in range, but noUncheckedIndexedAccess types
+       every array read as possibly undefined and cannot know that. */
+    .filter((other): other is CaseStudy => other !== undefined);
 
   return (
     <>
@@ -166,10 +181,24 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
           <a href="/" aria-label="IntelSolAI home" className="shrink-0">
             <Logo />
           </a>
+          {/*
+            Shown at every width, unlike the landing header's copy of this
+            button. There is no hamburger here to collide with — this header is
+            a logo and a CTA — and a visitor arriving from an ad would
+            otherwise have nothing to act on until the bottom of the page.
+
+            It used to carry `hidden sm:inline-flex`, which never took effect:
+            Button's base classes set `inline-flex` unconditionally, so a
+            non-important `hidden` has equal specificity and loses on stylesheet
+            order. The button rendered at every width regardless. Rather than
+            add `!` flags to enforce an intent that was wrong for this header,
+            the classes now say what actually happens, and only step the padding
+            and type down so it fits a 320px screen on one line.
+          */}
           <BookCall
             url={primaryCta.href}
             label={primaryCta.label}
-            className="hidden sm:inline-flex"
+            className="!min-h-[44px] whitespace-nowrap !px-3.5 !py-2.5 !text-[0.82rem] sm:!px-4 sm:!text-[0.9rem]"
           />
         </div>
       </header>

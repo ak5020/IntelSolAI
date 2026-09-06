@@ -285,7 +285,7 @@ they were not served — nothing links to them.
 
 ### 1.5 Case study pages — what is claimed, and what is not
 
-Four case studies ship as their own pages, linked from the landing page and
+Five case studies ship as their own pages, linked from the landing page and
 listed in the sitemap:
 
 | URL | Subject | Visual |
@@ -294,6 +294,7 @@ listed in the sitemap:
 | `/whatsapp-commerce` | AI WhatsApp Commerce & Customer Support Agent | demo recording |
 | `/demand-iq-hubspot` | Demand IQ → HubSpot CRM Automation | hand-drawn workflow |
 | `/seo-automation` | AI-Powered SEO FAQ Automation | hand-drawn workflow |
+| `/regulatory-compliance` | Regulatory Change Impact Mapper | demo recording |
 
 **There is not one invented number on any of them.** You said these pages are
 what you will run ads against, which raises the accuracy bar rather than
@@ -327,6 +328,67 @@ problem. `results` in `lib/caseStudies.ts` is where they go.
   your originals: `components/svg/DemandIqFlow.tsx` and `SeoFlow.tsx`. The node
   labels are shortened to fit ("Get report + fields" for "Get Prospect Report
   and Custom Fields"); tell me if any of them misrepresents a step.
+
+---
+
+### 1.6 ⚠️ The Regulatory Change Impact Mapper — decide these before it goes live
+
+This one carries more risk than the other four, because unlike them it is a
+named piece of work for a named third party. Three things need your decision.
+
+**1. The client's name is all over the recording.** The copy on
+`/regulatory-compliance` deliberately does not name them — it describes them by
+profile ("a financial-services firm", the SEC-registered transfer agent detail
+from your report) so the page stands on its own. But the demo video shows
+"Verilink Financial", "Verilink KB Documents" and "Verilink's business" on
+screen dozens of times, in the n8n nodes, the agent output and the dashboard.
+Prose anonymity plus an on-screen name is not anonymity.
+
+So: **get their written sign-off before this page is public**, in the same way
+§1.4 flags the client logos. If they agree, the page gets stronger — add the
+name to `overview` and `whyItMatters` in `lib/caseStudies.ts` and it reads as a
+real reference. If they do not, the video has to be re-recorded against a
+renamed profile; masking the name frame by frame is not realistic at 6 minutes.
+
+If Verilink is a synthetic profile you built the system against rather than a
+paying client, none of the above applies — but then the page must not imply it
+was a client engagement, and I need to know so the copy can say "built against a
+representative financial-services profile" instead. **Tell me which it is.**
+
+**2. A personal email address is visible in the demo.** At roughly 4:45–5:20 the
+walkthrough opens Gmail to show the notification step, and the "Status: Approved
+by …" line shows `shahzaibghafoor369@gmail.com`, with a personal inbox (unread
+counts, sender names) around it. The ClickUp segment likewise shows the
+workspace named after a person rather than the business. None of that is
+dangerous, but on a page you are buying traffic to it looks like a side project
+rather than a company. Say the word and I will cut that stretch out of the
+video, or re-encode with those seconds blurred.
+
+**3. What the numbers say, and what the video shows.** Your completion report
+records 200 filings ingested at sign-off with 1 fully closed; the dashboard in
+the recording shows 309 and 4-5 complete, because ingestion kept running. The
+page states it as *"200 … as of the completion report, and still climbing — the
+dashboard in the recording shows 309"*, which is true of both and survives
+someone watching the video with the copy open. Do not simplify that back to a
+single figure without re-checking the recording.
+
+Everything else on the page is straight out of the report: eight phases, four
+specialists plus a supervisor, the six-stage pipeline, the four defects
+integration testing caught, and the Ohio River security-zone example in "Why it
+matters". No measured outcome is claimed, because the report does not contain
+one — §1.5's rule applies here too.
+
+**The recording was cleaned, not cropped.** The source carried both a
+`www.BANDICAM.com` banner across the top and a Windows activation nag bottom
+right. Both were removed in place with `delogo` rather than by cropping, so the
+full 1280×576 frame survives — cropping the top would have taken the n8n
+workflow title with it, which is what tells a viewer which phase they are
+looking at. Content SSIM against the source is 0.9982, i.e. the re-encode itself
+is visually lossless. The one visible artefact is a soft patch bottom-right in
+the few shots where the activation nag sat over body text — that text was
+already unreadable underneath it.
+
+---
 
 **Structured data was re-split when these pages were added.** The root layout
 had been emitting `FAQPage` and the product `VideoObject`s on every page, which

@@ -5,11 +5,11 @@ import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { products, productsCopy } from '@/lib/content';
 
 /**
- * S6 — the two flagship products, in alternating full-width blocks.
+ * S6 — the flagship products, in alternating full-width blocks.
  *
- * The video column comes first in the DOM on both rows; the reversal on the
- * second row is a grid-order change only, so reading order stays logical for
- * screen readers and keyboard users.
+ * The video column comes first in the DOM on every row; the reversal on the
+ * odd-indexed rows is a grid-order change only, so reading order stays logical
+ * for screen readers and keyboard users.
  */
 export function Products() {
   return (

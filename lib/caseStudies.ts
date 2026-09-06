@@ -19,8 +19,13 @@
         client signs off on some, and the page gets considerably stronger.
 
    The order of this array is the order they render, on the landing page and in
-   the "related" rail. It matches the order requested: voice, WhatsApp, CRM,
-   SEO.
+   the "related" rail. It matches the order requested — voice, WhatsApp, CRM,
+   SEO — with the regulatory-compliance build appended as it was delivered
+   later.
+
+   ⚠️  The regulatory study describes the client by profile rather than by
+   name. The demo recording DOES show the client's name on screen throughout,
+   so publishing it still needs their written sign-off. See HANDOFF.md §1.6.
 --------------------------------------------------------------------------- */
 
 /** Which visual sits under the overview — a demo recording or a flow diagram. */
@@ -32,6 +37,8 @@ export type CaseStudyMedia =
       height: number;
       poster: string;
       sources: { mp4: string; webm: string };
+      /** ISO date, for the VideoObject the detail page emits. */
+      uploadDate: string;
       /** Shown under the player as a caption. */
       caption: string;
     }
@@ -74,7 +81,7 @@ export type CaseStudy = {
 export const caseStudiesCopy = {
   eyebrow: 'Case studies',
   heading: 'What we built, and how it works',
-  sub: 'Four systems running in production — an outbound voice agent, a WhatsApp commerce agent, a CRM integration, and a content pipeline. Each one opens in full: the problem, the build, and the stack behind it.',
+  sub: 'Five systems running in production — an outbound voice agent, a WhatsApp commerce agent, a CRM integration, a content pipeline, and a multi-agent regulatory compliance system. Each one opens in full: the problem, the build, and the stack behind it.',
 } as const;
 
 export const caseStudies: readonly CaseStudy[] = [
@@ -98,6 +105,7 @@ export const caseStudies: readonly CaseStudy[] = [
         mp4: '/videos/lead-qualification.mp4',
         webm: '/videos/lead-qualification.webm',
       },
+      uploadDate: '2026-08-09',
       caption:
         'The build console: assistant configuration, model presets with their measured latency and cost, voice selection, and a live call with the transcript streaming alongside it.',
     },
@@ -184,6 +192,7 @@ export const caseStudies: readonly CaseStudy[] = [
         mp4: '/videos/whatsapp-commerce.mp4',
         webm: '/videos/whatsapp-commerce.webm',
       },
+      uploadDate: '2026-08-16',
       caption:
         'A full session: order lookups returning status, courier and tracking, a returns-policy answer, a refund and cancellation flow, and the operations dashboard behind it.',
     },
@@ -401,6 +410,113 @@ export const caseStudies: readonly CaseStudy[] = [
       title: 'AI-Powered SEO FAQ Automation with n8n & OpenAI — Case Study | IntelSol AI',
       description:
         'How we automated SEO FAQ research and writing with n8n, the AlsoAsked API, OpenAI and Google Docs — no custom backend and no extra SaaS subscription.',
+    },
+  },
+
+  /* ----------------------------------------------------------------------- */
+  {
+    slug: 'regulatory-compliance',
+    category: 'Multi-agent AI · Regulatory compliance',
+    /* Shorter than the meta title on purpose. The full keyword phrase lives in
+       `meta.title` for search; on the page the eyebrow directly above the H1
+       already reads "Multi-agent AI · Regulatory compliance", so repeating
+       "AI Compliance Automation" in the heading only bought a four-line H1. */
+    title: 'AI Regulatory Change Impact Mapper',
+    cardTitle: 'Regulatory Change Impact Mapper',
+    cardSummary:
+      'Every new SEC and Federal Register filing read, assessed against the firm’s own policies by four specialist AI agents, and turned into one prioritised recommendation for a human to approve, modify or reject. Approved actions are executed, tracked to completion, and kept as precedent for the next similar filing.',
+    overview:
+      'A financial-services firm has to read everything the SEC and the Federal Register publish, work out which of it applies to them, and then do something about the part that does. Done by hand it is slow, inconsistent, and gets worse as regulatory volume grows. We built a system that takes the reading and the triage — but not the decision. It ingests new filings continuously, has four specialist AI agents assess each one against the firm’s own SOPs, client contracts and incident history, and hands a person a single prioritised recommendation to approve, modify or reject. Approved actions are then carried out automatically, tracked to completion, and recorded as precedent that informs the next comparable filing.',
+    media: {
+      kind: 'video',
+      title: 'Regulatory Change Impact Mapper',
+      width: 1280,
+      height: 576,
+      poster: '/videos/regulatory-compliance-poster.webp',
+      sources: {
+        mp4: '/videos/regulatory-compliance.mp4',
+        webm: '/videos/regulatory-compliance.webm',
+      },
+      uploadDate: '2026-09-06',
+      caption:
+        'The complete pipeline, end to end: ingestion from SEC EDGAR and the Federal Register, semantic retrieval against the firm’s own documents, the parent workflow calling four specialist agents and a supervisor, the approval dashboard, execution into task queues and email, and the monitoring loop that closes a regulation out and records it as precedent.',
+    },
+    challenge: {
+      body: 'The volume problem and the judgment problem look like one problem but are not. Most published filings are irrelevant to any one firm — yet each still has to be read to be ruled out, and that reading is what consumes a compliance team. The judgment that follows, on the small number that do matter, is the part that actually needs a person.',
+      points: [
+        'Dozens of new filings publish weekly across SEC EDGAR and the Federal Register alone',
+        'Most are irrelevant to any one firm, but each still needs a read to rule out',
+        'Review quality varies by reviewer, workload and time pressure',
+        'Without a structured record, the same judgment calls get re-litigated from scratch each time',
+        'A genuinely relevant change that is missed carries financial, legal and reputational exposure',
+        'Every action that reaches the real world still has to be a person’s decision',
+      ],
+    },
+    solution: {
+      body: 'A six-stage pipeline that closes the loop: regulation in, auditable action out, with the system’s judgment sharpening as its own track record grows. A human sits at stage four and nothing passes it unapproved.',
+      points: [
+        'Ingestion — filings pulled automatically from SEC EDGAR and the Federal Register, normalised into one record format and embedded for similarity search',
+        'Knowledge retrieval — each regulation matched by meaning, not keyword, against the firm’s own SOPs, client contracts and incident history',
+        'Multi-agent analysis — Compliance, Operations, Financial and Risk agents assess it independently; a Supervisor reconciles them into one severity, urgency window, cost estimate and action set',
+        'Human approval — every proposed action reviewed on a dashboard with working approve, modify and reject controls, each decision permanently recorded',
+        'Execution — approved actions create a task in the right team queue, update the relevant procedure, and notify the right person by email',
+        'Monitoring and learning — every action tracked to completion, overdue work escalated by email exactly once, and closed-out regulations recorded as precedent',
+      ],
+    },
+    technical: {
+      body: 'Each stage is its own n8n workflow against a single Postgres source of truth, which is what makes the pipeline debuggable: any phase can be run, inspected and re-run on real data without the others. The multi-agent layer is a parent workflow that fans out to four specialist sub-workflows and collects their outputs — so a specialist can be changed, or a fifth added, without touching the orchestration around it.',
+      points: [
+        'n8n orchestrates every stage as separate, independently runnable workflows',
+        'Supabase (PostgreSQL with vector search) as the single source of truth — regulations, embeddings, agent outputs, proposed actions, approvals, execution log and past decisions',
+        'Deduplication on ingest, so a filing seen once is never analysed twice',
+        'A parent workflow fans out to four specialist agent sub-workflows and merges their outputs for the Supervisor',
+        'Disagreement between specialists is surfaced explicitly rather than silently averaged away',
+        'Every proposed action stays traceable back to the specialist finding that produced it',
+        'Retrieved precedent is passed into the agents, which are instructed to weigh what is genuinely comparable and disregard what is not',
+        'ClickUp queues for task routing, Gmail and Google Calendar for notification, escalation and deadlines',
+        'A dedicated end-to-end integration testing phase, run on live data across every handoff between stages',
+      ],
+    },
+    technologies: [
+      'Multi-Agent AI',
+      'n8n',
+      'OpenAI',
+      'Supabase (pgvector)',
+      'Human-in-the-Loop',
+      'Vector Search',
+      'ClickUp API',
+      'Retool',
+      'Gmail & Calendar APIs',
+    ],
+    results: [
+      'Delivered in eight phases and verified running end to end on real data — from a filing appearing at the source through to a completed, logged, precedent-generating action',
+      '200 real federal filings ingested with zero duplicates as of the completion report, and still climbing as the scheduled ingestion keeps running — the dashboard in the recording shows 309',
+      'Every regulation receives the same four-perspective assessment, whether it is the first of the week or the fortieth',
+      'Nothing reaches the real world without a person approving it, and every approve, modify and reject decision is recorded for audit',
+      'Overdue actions escalate by email automatically, exactly once, instead of waiting for someone to notice',
+      'Closed-out regulations become precedent that is retrieved and weighed the next time a topically similar filing arrives',
+      'Integration testing across stage handoffs caught four cross-phase defects — including precedent being retrieved but not passed to the agents — that phase-by-phase testing would not have surfaced',
+    ],
+    whyItMatters:
+      'The tempting version of this system lets the model decide. This one deliberately does not. Its job is to remove the reading and the triage so that the person making the call spends their attention on the handful of filings that might matter rather than the hundreds that do not. The recorded demo makes that point better than a claim would: a Coast Guard security zone on the Ohio River is assessed by all four specialists, reaches a Low-severity verdict with three light-touch proposed actions — and the human reviewer rejects all three as unnecessary. Surfacing it was correct and closing it was correct, and both halves of that are the design working as intended.',
+    servicesBehind: [
+      {
+        title: 'Agentic AI & Multi-Agent Systems',
+        body: 'Specialist agents, supervisor synthesis and traceable recommendations',
+      },
+      {
+        title: 'Workflow & Process Automation',
+        body: 'Ingestion, execution, escalation and monitoring pipelines in n8n',
+      },
+      {
+        title: 'RAG & LLM Integrations',
+        body: 'Semantic retrieval against internal policy, contracts and precedent',
+      },
+    ],
+    meta: {
+      title: 'Regulatory Change Impact Mapper — AI Compliance Automation Case Study | IntelSol AI',
+      description:
+        'How we built a multi-agent AI system that ingests SEC and Federal Register filings, assesses each against a firm’s own policies and contracts, and routes a decision-ready recommendation to a human for approval.',
     },
   },
 ] as const;

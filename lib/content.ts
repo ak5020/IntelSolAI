@@ -239,10 +239,18 @@ export const workflowStack = ['OpenAI', 'Anthropic Claude', 'Google Gemini'] as 
 //
 // Two formats, and the ORDER MATTERS.
 //
-// Measured on these exact files: the H.264 MP4 is ~40% smaller than the VP9
-// WebM at the same quality (SSIM 0.9957 vs 0.9958 — indistinguishable). So MP4
-// is listed first and every browser that can decode H.264 gets the smaller
-// download.
+// MP4 is listed first, so every browser that can decode H.264 gets it. On the
+// first two demos that also happens to be the smaller file — measured, the
+// H.264 MP4 came out ~40% under the VP9 WebM at matched quality (SSIM 0.9957
+// vs 0.9958, indistinguishable).
+//
+// The regulatory demo inverts the size relationship — 20.1 MB MP4 against a
+// 10.7 MB WebM — but not the ordering, because it is not the same quality:
+// content SSIM against the source is 0.9982 for the MP4 and 0.9935 for the
+// WebM. VP9 is buying that size with softness, which is the wrong trade on a
+// six-minute screen recording where the point is reading node labels. Pushing
+// the WebM to CRF 30 cost 15% more bytes (12.3 MB) for +0.0012 SSIM, so CRF 34
+// is what shipped. MP4 first still means best-quality-first.
 //
 // WebM is kept purely as a fallback: codec-stripped Chromium builds ship on
 // several Linux distributions and cannot decode H.264 at all. Without the
@@ -290,11 +298,30 @@ export const products = [
       'Demo of the IntelSol AI Lead Qualification and Cold Calling Platform: an outbound voice agent that dials, qualifies, handles objections, books meetings and syncs to CRM.',
     uploadDate: '2026-08-09',
   },
+  {
+    id: 'regulatory-compliance',
+    title: 'Regulatory Change Impact Mapper',
+    body: 'New SEC and Federal Register filings are ingested automatically, assessed by four specialist AI agents and a supervisor against the firm’s own policies, contracts and incident history, then routed to a person to approve, modify or reject before anything happens.',
+    tags: ['Multi-Agent AI', 'RegTech', 'Human-in-the-Loop'],
+    /* Native dimensions — a desktop screen recording. Unlike the WhatsApp
+       demo, no rows were cropped here: both capture watermarks were removed
+       in place with delogo, so the full frame survives. */
+    width: 1280,
+    height: 576,
+    poster: '/videos/regulatory-compliance-poster.webp',
+    sources: {
+      mp4: '/videos/regulatory-compliance.mp4',
+      webm: '/videos/regulatory-compliance.webm',
+    },
+    description:
+      'Demo of the IntelSol AI Regulatory Change Impact Mapper: automated ingestion of SEC and Federal Register filings, four specialist AI agents plus a supervisor, a human approval dashboard, automated execution and a precedent-learning loop.',
+    uploadDate: '2026-09-06',
+  },
 ] as const;
 
 export const productsCopy = {
   eyebrow: 'Built & shipped',
-  heading: 'Two products already doing the work',
+  heading: 'Three products already doing the work',
 } as const;
 
 // ---------------------------------------------------------------------------
