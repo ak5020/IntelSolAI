@@ -353,33 +353,50 @@ carries for the client logos. Get it in writing before the ads run. If they
 decline, the fix is not editing the copy; the video would have to be re-recorded
 against a renamed profile, because the name is unmaskable at six minutes.
 
-**The personal email address is redacted.** At 4:43–4:55 the walkthrough opens
+**The personal email address is redacted.** At 4:44–4:55 the walkthrough opens
 Gmail to show the notification step, and the "Status: Approved by …" line shows
 `shahzaibghafoor369@gmail.com`. It is now covered by a hard pixel mosaic — a
-downscale-then-nearest-neighbour-upscale, not a blur, so there is no
-higher-frequency detail left to recover — that tracks the line through the
-scroll in four measured segments.
+downscale then nearest-neighbour upscale, not a blur, so there is no
+higher-frequency detail left to recover — tracking the line through the scroll
+in four measured segments.
 
 How the boxes were derived, in case the video is ever re-cut: every frame was
 OCR'd at 10fps through 283–298s to record where the address actually sat, rather
-than eyeballing it. It is at x 475–656 throughout, and moves vertically as the
+than eyeballing it. It is at x 475–656 throughout and moves vertically as the
 page scrolls — y≈490 at 283.9s, settling at y≈445, sweeping to y≈280 at 289.4s,
 and sweeping back at 294.8s. The redaction covers the stable positions tightly
 and widens to a tall band across the two scroll sweeps, so the address is never
-briefly exposed mid-transition. The finished encode was then re-OCR'd at 5fps
-across all six minutes; the address does not survive anywhere.
+briefly exposed mid-transition.
+
+**Both finished encodes were then verified, not assumed.** Two passes each:
+dense (278–300s at 10fps, cropped to the x-band the address occupies) and broad
+(the whole six minutes at 1fps, full frame). The address appears **zero** times
+in either the MP4 or the WebM.
+
+That result only means something because the method was controlled first: the
+same cropped detection run against the *unredacted* source finds the address in
+16/16 frames. Two earlier attempts at this check were thrown away rather than
+trusted — one used the `select` filter to trim, which leaves timestamps intact
+so the following `fps` filter duplicated a single frame 727 times and would have
+"passed" on nothing; the other let tesseract multithread itself into a stall
+(one dense n8n canvas burned five minutes of CPU on a single frame). The
+scripts are `verify2.py` in the session scratchpad; run with `OMP_THREAD_LIMIT=1`
+and a per-frame timeout, and any frame that times out is reported as *unchecked*
+rather than counted as clean.
 
 Two related things were deliberately **not** touched, because you asked for the
-email and only the email:
+email and only the email. The broad pass located them exactly:
 
-- The ClickUp workspace is named after a person rather than the business
-  ("Shahzaib Ghafoor Workspace", visible around 4:27 and 5:15), and the Gmail
-  inbox behind the notification shows unread counts and sender names.
-- The n8n instance hostname is a personal subdomain (visible around 3:21).
+- **3:20–3:31** — the n8n instance hostname is a personal subdomain
+  (`https://shahzaib-n8n…`, in a node's URL field).
+- **4:26–4:31 and 5:11–5:18** — the ClickUp workspace and DM list are named
+  after a person rather than the business ("Shahzaib Ghafoor Workspace"). The
+  Gmail inbox behind the notification also shows unread counts and sender names.
 
 None of it is dangerous. It does make the page read as a side project rather
 than a company, which matters more now that a real client is named on it. Say
-the word if you want those covered too.
+the word if you want those covered too — the timestamps above are what a second
+pass would target.
 
 **On the numbers.** You left this to me, so: the page now says **"Over 300 real
 federal filings ingested and tracked through the full lifecycle, deduplicated on
