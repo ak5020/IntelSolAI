@@ -23,9 +23,11 @@
    SEO — with the regulatory-compliance build appended as it was delivered
    later.
 
-   ⚠️  The regulatory study describes the client by profile rather than by
-   name. The demo recording DOES show the client's name on screen throughout,
-   so publishing it still needs their written sign-off. See HANDOFF.md §1.6.
+   ⚠️  The regulatory study names its client, Verilink Financial, Inc., because
+   the client is real and the demo recording shows their name on screen
+   throughout — anonymising the prose while the video says it forty times would
+   have been anonymity in name only. Naming them makes the page a reference,
+   which needs their sign-off. See HANDOFF.md §1.6.
 --------------------------------------------------------------------------- */
 
 /** Which visual sits under the overview — a demo recording or a flow diagram. */
@@ -424,9 +426,9 @@ export const caseStudies: readonly CaseStudy[] = [
     title: 'AI Regulatory Change Impact Mapper',
     cardTitle: 'Regulatory Change Impact Mapper',
     cardSummary:
-      'Every new SEC and Federal Register filing read, assessed against the firm’s own policies by four specialist AI agents, and turned into one prioritised recommendation for a human to approve, modify or reject. Approved actions are executed, tracked to completion, and kept as precedent for the next similar filing.',
+      'Built for Verilink Financial, an SEC-registered transfer agent. Every new SEC and Federal Register filing is read, assessed against Verilink’s own policies by four specialist AI agents, and turned into one prioritised recommendation for a human to approve, modify or reject. Approved actions are executed, tracked to completion, and kept as precedent for the next similar filing.',
     overview:
-      'A financial-services firm has to read everything the SEC and the Federal Register publish, work out which of it applies to them, and then do something about the part that does. Done by hand it is slow, inconsistent, and gets worse as regulatory volume grows. We built a system that takes the reading and the triage — but not the decision. It ingests new filings continuously, has four specialist AI agents assess each one against the firm’s own SOPs, client contracts and incident history, and hands a person a single prioritised recommendation to approve, modify or reject. Approved actions are then carried out automatically, tracked to completion, and recorded as precedent that informs the next comparable filing.',
+      'Verilink Financial, Inc. is an SEC-registered transfer agent providing payment processing, embedded lending and financial data APIs to mid-market B2B clients. That means reading everything the SEC and the Federal Register publish, working out which of it applies to them, and then doing something about the part that does. Done by hand it is slow, inconsistent, and gets worse as regulatory volume grows. We built a system that takes the reading and the triage — but not the decision. It ingests new filings continuously, has four specialist AI agents assess each one against Verilink’s own SOPs, client contracts and incident history, and hands a person a single prioritised recommendation to approve, modify or reject. Approved actions are then carried out automatically, tracked to completion, and recorded as precedent that informs the next comparable filing.',
     media: {
       kind: 'video',
       title: 'Regulatory Change Impact Mapper',
@@ -439,13 +441,13 @@ export const caseStudies: readonly CaseStudy[] = [
       },
       uploadDate: '2026-09-06',
       caption:
-        'The complete pipeline, end to end: ingestion from SEC EDGAR and the Federal Register, semantic retrieval against the firm’s own documents, the parent workflow calling four specialist agents and a supervisor, the approval dashboard, execution into task queues and email, and the monitoring loop that closes a regulation out and records it as precedent.',
+        'The complete pipeline, end to end: ingestion from SEC EDGAR and the Federal Register, semantic retrieval against Verilink’s own documents, the parent workflow calling four specialist agents and a supervisor, the approval dashboard, execution into task queues and email, and the monitoring loop that closes a regulation out and records it as precedent.',
     },
     challenge: {
-      body: 'The volume problem and the judgment problem look like one problem but are not. Most published filings are irrelevant to any one firm — yet each still has to be read to be ruled out, and that reading is what consumes a compliance team. The judgment that follows, on the small number that do matter, is the part that actually needs a person.',
+      body: 'The volume problem and the judgment problem look like one problem but are not. Most published filings are irrelevant to Verilink — yet each still has to be read to be ruled out, and that reading is what consumes a compliance team. The judgment that follows, on the small number that do matter, is the part that actually needs a person.',
       points: [
         'Dozens of new filings publish weekly across SEC EDGAR and the Federal Register alone',
-        'Most are irrelevant to any one firm, but each still needs a read to rule out',
+        'Most are irrelevant to Verilink, but each still needs a read to rule out',
         'Review quality varies by reviewer, workload and time pressure',
         'Without a structured record, the same judgment calls get re-litigated from scratch each time',
         'A genuinely relevant change that is missed carries financial, legal and reputational exposure',
@@ -456,7 +458,7 @@ export const caseStudies: readonly CaseStudy[] = [
       body: 'A six-stage pipeline that closes the loop: regulation in, auditable action out, with the system’s judgment sharpening as its own track record grows. A human sits at stage four and nothing passes it unapproved.',
       points: [
         'Ingestion — filings pulled automatically from SEC EDGAR and the Federal Register, normalised into one record format and embedded for similarity search',
-        'Knowledge retrieval — each regulation matched by meaning, not keyword, against the firm’s own SOPs, client contracts and incident history',
+        'Knowledge retrieval — each regulation matched by meaning, not keyword, against Verilink’s own SOPs, client contracts and incident history',
         'Multi-agent analysis — Compliance, Operations, Financial and Risk agents assess it independently; a Supervisor reconciles them into one severity, urgency window, cost estimate and action set',
         'Human approval — every proposed action reviewed on a dashboard with working approve, modify and reject controls, each decision permanently recorded',
         'Execution — approved actions create a task in the right team queue, update the relevant procedure, and notify the right person by email',
@@ -490,7 +492,15 @@ export const caseStudies: readonly CaseStudy[] = [
     ],
     results: [
       'Delivered in eight phases and verified running end to end on real data — from a filing appearing at the source through to a completed, logged, precedent-generating action',
-      '200 real federal filings ingested with zero duplicates as of the completion report, and still climbing as the scheduled ingestion keeps running — the dashboard in the recording shows 309',
+      /* Deliberately "300+" and not "200". The completion report records 200
+         filings with zero duplicates at sign-off; the dashboard in the
+         recording on this page shows 309, because the scheduled ingestion kept
+         running afterwards. Both are true, but only one of them is on screen
+         in the video directly above this list — and a reader who watches it
+         while reading a "200" claim finds a contradiction we would then have
+         to explain. "300+" agrees with the artefact, stays true as the number
+         keeps climbing, and is the more impressive figure anyway. */
+      'Over 300 real federal filings ingested and tracked through the full lifecycle, deduplicated on ingest — the dashboard in the recording above shows 309',
       'Every regulation receives the same four-perspective assessment, whether it is the first of the week or the fortieth',
       'Nothing reaches the real world without a person approving it, and every approve, modify and reject decision is recorded for audit',
       'Overdue actions escalate by email automatically, exactly once, instead of waiting for someone to notice',
@@ -498,7 +508,7 @@ export const caseStudies: readonly CaseStudy[] = [
       'Integration testing across stage handoffs caught four cross-phase defects — including precedent being retrieved but not passed to the agents — that phase-by-phase testing would not have surfaced',
     ],
     whyItMatters:
-      'The tempting version of this system lets the model decide. This one deliberately does not. Its job is to remove the reading and the triage so that the person making the call spends their attention on the handful of filings that might matter rather than the hundreds that do not. The recorded demo makes that point better than a claim would: a Coast Guard security zone on the Ohio River is assessed by all four specialists, reaches a Low-severity verdict with three light-touch proposed actions — and the human reviewer rejects all three as unnecessary. Surfacing it was correct and closing it was correct, and both halves of that are the design working as intended.',
+      'The tempting version of this system lets the model decide. This one deliberately does not. Its job is to remove the reading and the triage so that the person making the call spends their attention on the handful of filings that might matter rather than the hundreds that do not. The recorded demo makes that point better than a claim would: a Coast Guard security zone on the Ohio River is assessed by all four specialists — none of whom find any exposure for a financial-services firm with no maritime operations — reaches a Low-severity verdict with three light-touch proposed actions, and the human reviewer rejects all three as unnecessary. Surfacing it was correct and closing it was correct, and both halves of that are the design working as intended.',
     servicesBehind: [
       {
         title: 'Agentic AI & Multi-Agent Systems',
@@ -516,7 +526,7 @@ export const caseStudies: readonly CaseStudy[] = [
     meta: {
       title: 'Regulatory Change Impact Mapper — AI Compliance Automation Case Study | IntelSol AI',
       description:
-        'How we built a multi-agent AI system that ingests SEC and Federal Register filings, assesses each against a firm’s own policies and contracts, and routes a decision-ready recommendation to a human for approval.',
+        'How we built a multi-agent AI system for Verilink Financial that ingests SEC and Federal Register filings, assesses each against the firm’s own policies and contracts, and routes a decision-ready recommendation to a human for approval.',
     },
   },
 ] as const;

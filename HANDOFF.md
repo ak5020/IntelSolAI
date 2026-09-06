@@ -331,46 +331,69 @@ problem. `results` in `lib/caseStudies.ts` is where they go.
 
 ---
 
-### 1.6 ⚠️ The Regulatory Change Impact Mapper — decide these before it goes live
+### 1.6 The Regulatory Change Impact Mapper — a named client, and what that means
 
 This one carries more risk than the other four, because unlike them it is a
-named piece of work for a named third party. Three things need your decision.
+named piece of work for a named third party.
 
-**1. The client's name is all over the recording.** The copy on
-`/regulatory-compliance` deliberately does not name them — it describes them by
-profile ("a financial-services firm", the SEC-registered transfer agent detail
-from your report) so the page stands on its own. But the demo video shows
-"Verilink Financial", "Verilink KB Documents" and "Verilink's business" on
-screen dozens of times, in the n8n nodes, the agent output and the dashboard.
-Prose anonymity plus an on-screen name is not anonymity.
+**Verilink Financial, Inc. is named on the page.** You confirmed they are a real
+client, so the copy names them: the card summary, the overview, the challenge,
+the media caption and the meta description all say Verilink rather than "a
+financial-services firm". That was the right call over anonymising, because the
+demo video shows "Verilink Financial", "Verilink KB Documents" and "Verilink's
+business" on screen dozens of times — in the n8n nodes, the agent output and the
+dashboard. Anonymous prose over a video that says the name forty times is not
+anonymity, it is just a page that looks evasive.
 
-So: **get their written sign-off before this page is public**, in the same way
-§1.4 flags the client logos. If they agree, the page gets stronger — add the
-name to `overview` and `whyItMatters` in `lib/caseStudies.ts` and it reads as a
-real reference. If they do not, the video has to be re-recorded against a
-renamed profile; masking the name frame by frame is not realistic at 6 minutes.
+**The one thing still outstanding: their written sign-off.** Naming a client
+turns this page into a public reference, and running paid traffic to it puts
+their name in front of an audience they did not choose. That is a permission
+question, not a design one, and I cannot answer it for you — the same flag §1.4
+carries for the client logos. Get it in writing before the ads run. If they
+decline, the fix is not editing the copy; the video would have to be re-recorded
+against a renamed profile, because the name is unmaskable at six minutes.
 
-If Verilink is a synthetic profile you built the system against rather than a
-paying client, none of the above applies — but then the page must not imply it
-was a client engagement, and I need to know so the copy can say "built against a
-representative financial-services profile" instead. **Tell me which it is.**
+**The personal email address is redacted.** At 4:43–4:55 the walkthrough opens
+Gmail to show the notification step, and the "Status: Approved by …" line shows
+`shahzaibghafoor369@gmail.com`. It is now covered by a hard pixel mosaic — a
+downscale-then-nearest-neighbour-upscale, not a blur, so there is no
+higher-frequency detail left to recover — that tracks the line through the
+scroll in four measured segments.
 
-**2. A personal email address is visible in the demo.** At roughly 4:45–5:20 the
-walkthrough opens Gmail to show the notification step, and the "Status: Approved
-by …" line shows `shahzaibghafoor369@gmail.com`, with a personal inbox (unread
-counts, sender names) around it. The ClickUp segment likewise shows the
-workspace named after a person rather than the business. None of that is
-dangerous, but on a page you are buying traffic to it looks like a side project
-rather than a company. Say the word and I will cut that stretch out of the
-video, or re-encode with those seconds blurred.
+How the boxes were derived, in case the video is ever re-cut: every frame was
+OCR'd at 10fps through 283–298s to record where the address actually sat, rather
+than eyeballing it. It is at x 475–656 throughout, and moves vertically as the
+page scrolls — y≈490 at 283.9s, settling at y≈445, sweeping to y≈280 at 289.4s,
+and sweeping back at 294.8s. The redaction covers the stable positions tightly
+and widens to a tall band across the two scroll sweeps, so the address is never
+briefly exposed mid-transition. The finished encode was then re-OCR'd at 5fps
+across all six minutes; the address does not survive anywhere.
 
-**3. What the numbers say, and what the video shows.** Your completion report
-records 200 filings ingested at sign-off with 1 fully closed; the dashboard in
-the recording shows 309 and 4-5 complete, because ingestion kept running. The
-page states it as *"200 … as of the completion report, and still climbing — the
-dashboard in the recording shows 309"*, which is true of both and survives
-someone watching the video with the copy open. Do not simplify that back to a
-single figure without re-checking the recording.
+Two related things were deliberately **not** touched, because you asked for the
+email and only the email:
+
+- The ClickUp workspace is named after a person rather than the business
+  ("Shahzaib Ghafoor Workspace", visible around 4:27 and 5:15), and the Gmail
+  inbox behind the notification shows unread counts and sender names.
+- The n8n instance hostname is a personal subdomain (visible around 3:21).
+
+None of it is dangerous. It does make the page read as a side project rather
+than a company, which matters more now that a real client is named on it. Say
+the word if you want those covered too.
+
+**On the numbers.** You left this to me, so: the page now says **"Over 300 real
+federal filings ingested and tracked through the full lifecycle, deduplicated on
+ingest — the dashboard in the recording above shows 309."**
+
+The reasoning, so it does not get "corrected" later. Your completion report
+records 200 filings at sign-off with 1 fully closed. The dashboard in the
+recording shows 309 and 4–5 complete, because the scheduled ingestion kept
+running after the report was written. Both are true. But only one of them is on
+screen in the video sitting directly above that sentence — and a prospect who
+watches the demo while reading a "200" claim finds a contradiction you would
+then have to explain. "300+" agrees with the artefact, stays true as the number
+keeps climbing, and is the better figure anyway. If you ever swap the recording,
+re-check the dashboard and update the sentence with it.
 
 Everything else on the page is straight out of the report: eight phases, four
 specialists plus a supervisor, the six-stage pipeline, the four defects

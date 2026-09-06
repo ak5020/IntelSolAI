@@ -301,7 +301,7 @@ export const products = [
   {
     id: 'regulatory-compliance',
     title: 'Regulatory Change Impact Mapper',
-    body: 'New SEC and Federal Register filings are ingested automatically, assessed by four specialist AI agents and a supervisor against the firm’s own policies, contracts and incident history, then routed to a person to approve, modify or reject before anything happens.',
+    body: 'Built for Verilink Financial, an SEC-registered transfer agent. New SEC and Federal Register filings are ingested automatically, assessed by four specialist AI agents and a supervisor against Verilink’s own policies, contracts and incident history, then routed to a person to approve, modify or reject before anything happens.',
     tags: ['Multi-Agent AI', 'RegTech', 'Human-in-the-Loop'],
     /* Native dimensions — a desktop screen recording. Unlike the WhatsApp
        demo, no rows were cropped here: both capture watermarks were removed
@@ -314,7 +314,7 @@ export const products = [
       webm: '/videos/regulatory-compliance.webm',
     },
     description:
-      'Demo of the IntelSol AI Regulatory Change Impact Mapper: automated ingestion of SEC and Federal Register filings, four specialist AI agents plus a supervisor, a human approval dashboard, automated execution and a precedent-learning loop.',
+      'Demo of the IntelSol AI Regulatory Change Impact Mapper, built for Verilink Financial: automated ingestion of SEC and Federal Register filings, four specialist AI agents plus a supervisor, a human approval dashboard, automated execution and a precedent-learning loop.',
     uploadDate: '2026-09-06',
   },
 ] as const;
