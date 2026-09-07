@@ -64,7 +64,14 @@ export function Nav() {
       <nav aria-label="Primary" className="shell flex h-[72px] items-center justify-between">
         {/* The accessible name must start with the visible text ("IntelSolAI"),
             otherwise voice-control users cannot activate what they can read. */}
-        <a href="#top" aria-label="IntelSolAI home" className="shrink-0">
+        {/* inline-flex items-center, not just shrink-0: an <a> is inline by
+            default, so Logo's own inline-flex span was being vertically
+            placed by the surrounding line box's baseline/leading rules (driven
+            by the page's line-height) rather than truly centered — it rode
+            ~4px high of the header's centre while every other nav element
+            landed dead on it. Making the anchor itself a flex container
+            centers its child by box height instead. */}
+        <a href="#top" aria-label="IntelSolAI home" className="inline-flex shrink-0 items-center">
           <Logo />
         </a>
 

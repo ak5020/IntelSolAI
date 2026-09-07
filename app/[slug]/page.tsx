@@ -178,7 +178,10 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
           for a page they are not on. */}
       <header className="sticky top-0 z-50 border-b border-line bg-bg/[0.88] backdrop-blur-xl">
         <div className="shell flex h-[72px] items-center justify-between gap-4">
-          <a href="/" aria-label="IntelSolAI home" className="shrink-0">
+          {/* inline-flex items-center — see the matching comment in Nav.tsx.
+              A plain <a> lets Logo's inline-flex span be placed by the
+              surrounding line box's baseline instead of truly centered. */}
+          <a href="/" aria-label="IntelSolAI home" className="inline-flex shrink-0 items-center">
             <Logo />
           </a>
           {/*
