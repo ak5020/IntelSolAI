@@ -38,7 +38,7 @@ export type CaseStudyMedia =
       width: number;
       height: number;
       poster: string;
-      sources: { mp4: string; webm: string };
+      sources: { mp4: string; webm?: string };
       /** ISO date, for the VideoObject the detail page emits. */
       uploadDate: string;
       /** Shown under the player as a caption. */
@@ -100,16 +100,15 @@ export const caseStudies: readonly CaseStudy[] = [
     media: {
       kind: 'video',
       title: 'AI Lead Qualification & Cold Calling Platform',
-      width: 1280,
-      height: 552,
-      poster: '/videos/lead-qualification-poster.webp',
+      width: 1920,
+      height: 1080,
+      poster: '/videos/AI-Lead-Qualification-Demo-poster.webp',
       sources: {
-        mp4: '/videos/lead-qualification.mp4',
-        webm: '/videos/lead-qualification.webm',
+        mp4: '/videos/AI-Lead-Qualification-Demo.mp4',
       },
-      uploadDate: '2026-08-09',
+      uploadDate: '2026-09-22',
       caption:
-        'The build console: assistant configuration, model presets with their measured latency and cost, voice selection, and a live call with the transcript streaming alongside it.',
+        'The build console configuring the assistant, then the operator side: the lead pipeline dashboard, call analysis and objections, booked appointments, hot leads, and the call transcript log, finishing with the qualified-lead notification email.',
     },
     challenge: {
       body: 'A rep working a cold list spends most of the day on calls that will never qualify. The work is necessary and almost entirely mechanical until the moment someone says yes — and the moment after that, the part that decides whether the lead survives, depends on a tired person remembering to write it down.',

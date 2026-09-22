@@ -286,17 +286,16 @@ export const products = [
     title: 'AI Lead Qualification & Cold Calling Platform',
     body: 'An outbound voice agent that dials your list, qualifies against your criteria, handles objections, books meetings straight into the calendar, and writes every call back to the CRM.',
     tags: ['Voice AI', 'Outbound Sales', 'CRM Sync'],
-    /* Native dimensions — an ultrawide desktop screen recording. */
-    width: 1280,
-    height: 552,
-    poster: '/videos/lead-qualification-poster.webp',
+    /* Native dimensions of AI-Lead-Qualification-Demo.mp4. */
+    width: 1920,
+    height: 1080,
+    poster: '/videos/AI-Lead-Qualification-Demo-poster.webp',
     sources: {
-      mp4: '/videos/lead-qualification.mp4',
-      webm: '/videos/lead-qualification.webm',
+      mp4: '/videos/AI-Lead-Qualification-Demo.mp4',
     },
     description:
       'Demo of the IntelSol AI Lead Qualification and Cold Calling Platform: an outbound voice agent that dials, qualifies, handles objections, books meetings and syncs to CRM.',
-    uploadDate: '2026-08-09',
+    uploadDate: '2026-09-22',
   },
   {
     id: 'regulatory-compliance',

@@ -10,7 +10,7 @@ type Props = {
   width: number;
   height: number;
   poster: string;
-  sources: { mp4: string; webm: string };
+  sources: { mp4: string; webm?: string };
 };
 
 /** Portrait demos are phone recordings; full column width would be absurdly tall. */
@@ -175,7 +175,7 @@ export function VideoPlayer({ title, width, height, poster, sources }: Props) {
           {/* MP4 first: it is the smaller file, so anything that can decode
               H.264 takes it. WebM catches Chromium builds that cannot. */}
           <source src={sources.mp4} type="video/mp4" />
-          <source src={sources.webm} type="video/webm" />
+          {sources.webm && <source src={sources.webm} type="video/webm" />}
           Your browser does not support embedded video.
         </video>
       )}
