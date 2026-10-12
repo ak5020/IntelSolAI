@@ -39,14 +39,22 @@ function jsonLd() {
           acceptedAnswer: { '@type': 'Answer', text: faq.a },
         })),
       },
-      ...products.map((product) => ({
-        '@type': 'VideoObject',
-        name: `${product.title} — product demo`,
-        description: product.description,
-        thumbnailUrl: [`${site.url}${product.poster}`],
-        uploadDate: product.uploadDate,
-        contentUrl: `${site.url}${product.sources.mp4}`,
-      })),
+      /* thumbnailUrl is required for a valid VideoObject, so a demo without a
+         poster is left out rather than published with a broken one. */
+      ...products.flatMap((product) =>
+        product.poster
+          ? [
+              {
+                '@type': 'VideoObject',
+                name: `${product.title} — product demo`,
+                description: product.description,
+                thumbnailUrl: [`${site.url}${product.poster}`],
+                uploadDate: product.uploadDate,
+                contentUrl: `${site.url}${product.sources.mp4}`,
+              },
+            ]
+          : [],
+      ),
     ],
   };
 }

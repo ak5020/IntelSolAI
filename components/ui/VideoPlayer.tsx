@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { site } from '@/lib/content';
 
@@ -9,7 +9,11 @@ type Props = {
   /** Native pixel dimensions. Drive the reserved box, so CLS stays at zero. */
   width: number;
   height: number;
-  poster: string;
+  /**
+   * Still shown before play. Optional: without one, the player shows a frame
+   * from the video itself, at the cost of fetching its metadata on page load.
+   */
+  poster?: string;
   sources: { mp4: string; webm?: string };
 };
 
@@ -48,6 +52,11 @@ export function VideoPlayer({ title, width, height, poster, sources }: Props) {
 
   const isPortrait = height > width;
 
+  /* With no poster the video element is the preview, so it has to load enough
+     to draw a frame, and the #t fragment picks a frame past any fade-in. */
+  const previewFromVideo = !poster;
+  const fragment = previewFromVideo ? '#t=1' : '';
+
   /**
    * Starts playback.
    *
@@ -71,8 +80,34 @@ export function VideoPlayer({ title, width, height, poster, sources }: Props) {
 
   const activate = useCallback(() => {
     setActivated(true);
+    /* The #t=1 preview fragment would otherwise make playback start at 0:01. */
+    const video = videoRef.current;
+    if (previewFromVideo && video && video.currentTime > 0) video.currentTime = 0;
     startPlayback();
-  }, [startPlayback]);
+  }, [startPlayback, previewFromVideo]);
+
+  /**
+   * A missing or undecodable <source> fires its error on the <source>, never on
+   * the <video>: video.error stays null and React does not pass the event up to
+   * the video's onError. One failed source is not fatal, since the browser moves
+   * on to the next. Only once networkState reaches NETWORK_NO_SOURCE has every
+   * source failed, and that is when the fallback replaces a play button that
+   * would otherwise do nothing.
+   */
+  const onSourceError = useCallback((e: React.SyntheticEvent<HTMLSourceElement>) => {
+    const video = e.currentTarget.parentElement;
+    if (video instanceof HTMLVideoElement && video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+      setUnavailable(true);
+    }
+  }, []);
+
+  /* A preview-from-video player starts loading while the HTML is still being
+     parsed, so a missing file can fail before hydration attaches onSourceError.
+     Check once on mount; anything that fails later is caught by the handler. */
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) setUnavailable(true);
+  }, []);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
@@ -121,7 +156,7 @@ export function VideoPlayer({ title, width, height, poster, sources }: Props) {
         for no gain. Explicit width/height plus the container's aspect-ratio
         means the box is reserved before anything loads.
       */}
-      {!activated && (
+      {!activated && poster && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={poster}
@@ -145,12 +180,12 @@ export function VideoPlayer({ title, width, height, poster, sources }: Props) {
         <video
           ref={videoRef}
           className={`absolute inset-0 h-full w-full bg-bg object-contain ${
-            activated ? '' : 'invisible'
+            activated || previewFromVideo ? '' : 'invisible'
           }`}
           width={width}
           height={height}
           poster={poster}
-          preload="none"
+          preload={previewFromVideo ? 'metadata' : 'none'}
           playsInline
           onTimeUpdate={(e) => {
             const v = e.currentTarget;
@@ -159,23 +194,15 @@ export function VideoPlayer({ title, width, height, poster, sources }: Props) {
           onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
           onEnded={() => setPlaying(false)}
           onError={(e) => {
-            /*
-              A <source> that the browser cannot decode also surfaces here,
-              because React delegates error events from child elements. That is
-              NOT fatal — it just means the browser is about to try the next
-              source. Bailing out on it would unmount the element and destroy
-              the fallback chain.
-
-              The video element only sets its own `error` property once every
-              source has failed, so that is the real signal.
-            */
             if (e.currentTarget.error) setUnavailable(true);
           }}
         >
           {/* MP4 first: it is the smaller file, so anything that can decode
               H.264 takes it. WebM catches Chromium builds that cannot. */}
-          <source src={sources.mp4} type="video/mp4" />
-          {sources.webm && <source src={sources.webm} type="video/webm" />}
+          <source src={`${sources.mp4}${fragment}`} type="video/mp4" onError={onSourceError} />
+          {sources.webm && (
+            <source src={`${sources.webm}${fragment}`} type="video/webm" onError={onSourceError} />
+          )}
           Your browser does not support embedded video.
         </video>
       )}

@@ -430,6 +430,37 @@ already unreadable underneath it.
 
 ---
 
+### 1.7 The AI Employee Day-1 Readiness Agent — what was and wasn't checked
+
+`/hr-readiness-agent` and the fourth Products block play
+`public/videos/AI-HR-Readiness-Agent.mp4` exactly as you supplied it.
+
+**The copy comes from the concept brief, and the video was not reviewed.** Only
+the PDF was uploaded, so unlike every other demo on the site, nobody has looked
+through this recording for a capture watermark (BANDICAM and "Activate Windows"
+were on all three earlier recordings) or for personal data such as an email
+address, which the RCIM demo had. Watch it once end to end before ads point
+here. The caption under the video is deliberately generic for the same reason:
+it can't describe scenes nobody has seen.
+
+**No numbers are claimed.** The brief's figures (Sarah Khan, 78% readiness,
+47 new-hire questions, 82% versus 100%) are illustrations in a concept document,
+not measured results, so the page describes what the system does, as §1.5
+requires.
+
+**No poster yet.** Without a preview image the player shows a frame from the
+video itself, which costs a small metadata fetch on page load, and the page
+emits no `VideoObject` (Google requires a thumbnail). Upload the video and a
+proper poster can be cut from it. The box assumes 16:9; if the recording is a
+different shape it letterboxes rather than crops.
+
+**Wording changed to stay accurate.** Products now reads "Four products, built
+end to end" instead of "…already doing the work", and the case-study intro reads
+"Six systems we have built" instead of "running in production", because this one
+is a built demo rather than a client deployment.
+
+---
+
 **Structured data was re-split when these pages were added.** The root layout
 had been emitting `FAQPage` and the product `VideoObject`s on every page, which
 would have put FAQ markup on four pages with no FAQ on them — a

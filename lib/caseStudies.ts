@@ -20,8 +20,8 @@
 
    The order of this array is the order they render, on the landing page and in
    the "related" rail. It matches the order requested — voice, WhatsApp, CRM,
-   SEO — with the regulatory-compliance build appended as it was delivered
-   later.
+   SEO — with the regulatory-compliance and HR readiness builds appended in
+   the order they were delivered.
 
    ⚠️  The regulatory study names its client, Verilink Financial, Inc., because
    the client is real and the demo recording shows their name on screen
@@ -37,7 +37,8 @@ export type CaseStudyMedia =
       title: string;
       width: number;
       height: number;
-      poster: string;
+      /** Optional: without one the player previews a frame of the video. */
+      poster?: string;
       sources: { mp4: string; webm?: string };
       /** ISO date, for the VideoObject the detail page emits. */
       uploadDate: string;
@@ -83,7 +84,7 @@ export type CaseStudy = {
 export const caseStudiesCopy = {
   eyebrow: 'Case studies',
   heading: 'What we built, and how it works',
-  sub: 'Five systems running in production — an outbound voice agent, a WhatsApp commerce agent, a CRM integration, a content pipeline, and a multi-agent regulatory compliance system. Each one opens in full: the problem, the build, and the stack behind it.',
+  sub: 'Six systems we have built — an outbound voice agent, a WhatsApp commerce agent, a CRM integration, a content pipeline, a multi-agent regulatory compliance system, and an HR onboarding readiness agent. Each one opens in full: the problem, the build, and the stack behind it.',
 } as const;
 
 export const caseStudies: readonly CaseStudy[] = [
@@ -526,6 +527,104 @@ export const caseStudies: readonly CaseStudy[] = [
       title: 'Regulatory Change Impact Mapper — AI Compliance Automation Case Study | IntelSol AI',
       description:
         'How we built a multi-agent AI system for Verilink Financial that ingests SEC and Federal Register filings, assesses each against the firm’s own policies and contracts, and routes a decision-ready recommendation to a human for approval.',
+    },
+  },
+  /* ----------------------------------------------------------------------- */
+  {
+    slug: 'hr-readiness-agent',
+    category: 'Agentic AI · HR automation',
+    title: 'AI Employee Day-1 Readiness Agent',
+    cardTitle: 'AI HR Day-1 Readiness Agent',
+    cardSummary:
+      'An onboarding agent that answers the question a checklist cannot: is the new hire actually ready for Day 1? It finds what is blocking them, works out who owns each blocker, drives it to resolution, and its Knowledge Gap Detector turns recurring new-hire questions into documentation fixes.',
+    overview:
+      'Onboarding automation usually answers one question: are the tasks complete? We built the AI Employee Day-1 Readiness Agent to answer a better one: is the employee actually ready to start, and what is blocking them? It combines HR records, onboarding policies, role requirements, IT access, training, equipment and workflow status, uses retrieval to establish what applies to this person in this role, and treats anything missing as an exception with an owner and a next action. Nothing is marked resolved until the agent has checked that the real-world state changed. On top of that sits the Onboarding Knowledge Gap Detector, which reads the system’s own history of new-hire questions and repeated exceptions to find documentation that is missing or unclear.',
+    media: {
+      kind: 'video',
+      title: 'AI Employee Day-1 Readiness Agent',
+      width: 1920,
+      height: 1080,
+      sources: {
+        mp4: '/videos/AI-HR-Readiness-Agent.mp4',
+      },
+      uploadDate: '2026-10-12',
+      caption:
+        'A walkthrough of the Day-1 Readiness Agent and its Onboarding Knowledge Gap Detector.',
+    },
+    challenge: {
+      body: 'A checklist can read complete while the new hire still cannot do their job on Day 1: the laptop is assigned but GitHub access was never approved, the paperwork is signed but security training is outstanding, the email account exists but nobody scheduled the manager introduction. Task status says done; the employee is still blocked.',
+      points: [
+        'Checklists track whether tasks were ticked, not whether the employee can actually start',
+        'The evidence is spread across HR records, policies, role requirements, IT access, training and equipment',
+        'What applies depends on the role: a Software Engineer needs access a Sales hire does not',
+        'When something is missing, someone still has to work out who owns it and chase it',
+        'Access and policy decisions still need a person to sign them off',
+        'The same new-hire questions come up again and again, pointing at documentation that is missing or unclear',
+      ],
+    },
+    solution: {
+      body: 'A readiness-centric workflow rather than a task-centric one. Every new hire is evaluated against the requirements that actually apply to them, every gap becomes an exception with an owner, and the readiness score only moves when the agent has verified the fix.',
+      points: [
+        'Detects a new hire and pulls the employee’s context from the HR record',
+        'Retrieves the policies, SOPs and role requirements that apply to that person',
+        'Scores Day-1 readiness and separates what is complete from what is blocking',
+        'Works out the owner and next action for each exception, with the evidence behind it',
+        'Sends approvals, notifications and tasks through Slack, email and Jira, with a person approving sensitive access',
+        'Verifies each action actually happened, then recalculates readiness',
+        'Stores each resolved case so the next onboarding of the same role benefits from it',
+        'Onboarding Knowledge Gap Detector: analyses recurring questions, failed retrievals and repeated exceptions, and recommends the SOP to create or fix, with an owner',
+      ],
+    },
+    technical: {
+      body: 'Retrieval establishes what applies; reasoning decides what to do about it; deterministic rules and verification keep it honest. For a missing GitHub account, for example, the agent retrieves the employee’s role, the access policy and the application matrix, concludes the access is required for a Software Engineer, routes the approval to the Engineering Manager, provisions the access once approved, then re-checks the account before updating the readiness state.',
+      points: [
+        'RAG knowledge layer over HR records, onboarding policies and SOPs, and the role-to-access matrix',
+        'AI reasoning paired with deterministic rules',
+        'Readiness and exception engine that scores readiness from evidence, not task status',
+        'Human approval wherever access or policy is involved',
+        'n8n orchestration across Slack, email, Jira, the HRIS and IT systems',
+        'Verification step that re-checks the real system state before anything is marked resolved',
+        'Resolved cases stored as organisational memory for future retrieval',
+      ],
+    },
+    technologies: [
+      'RAG',
+      'Agentic AI',
+      'n8n',
+      'Human-in-the-Loop',
+      'Slack',
+      'Jira',
+      'HRIS Integration',
+      'Knowledge Base',
+    ],
+    results: [
+      'Readiness is measured from evidence, so a checklist can no longer read complete while the new hire is still blocked',
+      'Every exception arrives with an owner and a next action, instead of a status someone has to investigate',
+      'Approvals and notifications go out automatically, while sensitive access is still approved by a person',
+      'Nothing is marked resolved until the real system state has been re-checked',
+      'Resolved cases become memory, so the next onboarding of the same role starts from what worked last time',
+      'The Knowledge Gap Detector turns recurring new-hire questions into specific documentation fixes, each with an owner',
+    ],
+    whyItMatters:
+      'Automated onboarding tells HR which tasks are complete. This agent determines whether the employee is actually ready for Day 1, identifies what is blocking them, finds the responsible owner, and drives the issue to resolution. The Knowledge Gap Detector then closes the loop: the questions new hires keep asking become the documentation fixes that stop them being asked, so the onboarding process improves itself instead of just running faster.',
+    servicesBehind: [
+      {
+        title: 'Agentic AI & Multi-Agent Systems',
+        body: 'Readiness reasoning, exception ownership and next-action decisions',
+      },
+      {
+        title: 'RAG & LLM Integrations',
+        body: 'Retrieval over policies, SOPs and role requirements',
+      },
+      {
+        title: 'Workflow & Process Automation',
+        body: 'n8n orchestration of approvals, notifications and verification',
+      },
+    ],
+    meta: {
+      title: 'AI Employee Day-1 Readiness Agent — HR Onboarding Automation Case Study | IntelSol AI',
+      description:
+        'How we built an AI onboarding agent that checks whether a new hire is actually ready for Day 1, routes every blocker to its owner, verifies the fix, and detects gaps in onboarding documentation.',
     },
   },
 ] as const;

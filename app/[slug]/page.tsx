@@ -93,7 +93,8 @@ function jsonLd(study: CaseStudy) {
           { '@type': 'ListItem', position: 3, name: study.title, item: url },
         ],
       },
-      ...(study.media.kind === 'video'
+      /* Same rule as the landing page: no poster, no VideoObject. */
+      ...(study.media.kind === 'video' && study.media.poster
         ? [
             {
               '@type': 'VideoObject',

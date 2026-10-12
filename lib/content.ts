@@ -316,11 +316,29 @@ export const products = [
       'Demo of the IntelSol AI Regulatory Change Impact Mapper, built for Verilink Financial: automated ingestion of SEC and Federal Register filings, four specialist AI agents plus a supervisor, a human approval dashboard, automated execution and a precedent-learning loop.',
     uploadDate: '2026-09-06',
   },
+  {
+    id: 'hr-readiness',
+    title: 'AI Employee Day-1 Readiness Agent',
+    body: 'Checks whether a new hire is actually ready for Day 1, not just whether the onboarding checklist is done. It finds every blocker, routes it to the right owner with an approval where one is needed, verifies the fix, and its Knowledge Gap Detector flags the onboarding documentation new hires keep getting stuck on.',
+    tags: ['HR Automation', 'RAG', 'n8n'],
+    /* The recording is played as supplied (public/videos/AI-HR-Readiness-Agent.mp4)
+       and has no poster yet, so the player previews a frame of the video itself.
+       16:9 is assumed; the player letterboxes rather than crops if it differs. */
+    width: 1920,
+    height: 1080,
+    poster: undefined,
+    sources: {
+      mp4: '/videos/AI-HR-Readiness-Agent.mp4',
+    },
+    description:
+      'Demo of the IntelSol AI Employee Day-1 Readiness Agent: onboarding readiness verification, exception routing with human approval, and the Onboarding Knowledge Gap Detector.',
+    uploadDate: '2026-10-12',
+  },
 ] as const;
 
 export const productsCopy = {
   eyebrow: 'Built & shipped',
-  heading: 'Three products already doing the work',
+  heading: 'Four products, built end to end',
 } as const;
 
 // ---------------------------------------------------------------------------
