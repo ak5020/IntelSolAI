@@ -1,3 +1,4 @@
+import { About } from '@/components/sections/About';
 import { CaseStudies } from '@/components/sections/CaseStudies';
 import { Clients } from '@/components/sections/Clients';
 import { Cta } from '@/components/sections/Cta';
@@ -82,6 +83,7 @@ export default function Page() {
         <UseCases />
         <Industries />
         <Integrations />
+        <About />
         <Faq />
         <Cta />
       </main>

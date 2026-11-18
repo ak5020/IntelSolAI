@@ -185,6 +185,25 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             __html: `document.documentElement.dataset.revealReady='true'`,
           }}
         />
+        {/*
+          Settles layout before any in-page jump.
+
+          Sections marked .defer-paint skip rendering while off-screen and
+          reserve a guessed 800px until they are first painted. A jump to a
+          far-away anchor therefore aimed at a position computed from those
+          guesses, and as the sections it passed rendered at their real height
+          the target slid away — on a phone the nav links landed thousands of
+          pixels short. Flipping data-layout-settled renders them all once
+          (contain-intrinsic-size: auto then remembers the real sizes), and it
+          happens in the click handler, before the browser computes where to
+          scroll. Capture phase and delegation so it covers every #link on the
+          page — nav, footer, CTAs — plus a URL that arrives with a hash.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var d=document.documentElement;function s(){d.dataset.layoutSettled='true'}if(location.hash.length>1)s();document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href^="#"]');if(a&&a.getAttribute('href').length>1)s()},true)})()`,
+          }}
+        />
       </head>
       <body>
         <a href="#main" className="skip-link">

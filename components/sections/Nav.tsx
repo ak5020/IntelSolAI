@@ -76,7 +76,7 @@ export function Nav() {
         </a>
 
         {/* Desktop links ------------------------------------------------- */}
-        <ul className="hidden items-center gap-8 lg:flex">
+        <ul className="hidden items-center gap-5 lg:flex xl:gap-8">
           {navLinks.map((link) => {
             const active = activeId === link.href.slice(1);
             return (
