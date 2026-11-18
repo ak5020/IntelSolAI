@@ -424,6 +424,12 @@ html[data-reveal-ready='true'] .acc-panel[data-open='true'] {
   contain-intrinsic-size: auto 800px;
 }
 
+/* See the layout-settling script in app/layout.tsx: once someone jumps to an
+   anchor, sections render at their real size so the jump lands accurately. */
+html[data-layout-settled='true'] .defer-paint {
+  content-visibility: visible;
+}
+
 /* ===========================================================================
    Hero load-in (S2)
    ---------------------------------------------------------------------------

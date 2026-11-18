@@ -32,6 +32,7 @@ export const navLinks = [
   { label: 'Case studies', href: '#case-studies' },
   { label: 'Process', href: '#process' },
   { label: 'Industries', href: '#industries' },
+  { label: 'About', href: '#about' },
   { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ] as const;
@@ -606,6 +607,58 @@ export const faqCopy = {
   eyebrow: 'Before you ask',
   heading: 'Common questions',
 } as const;
+
+// ---------------------------------------------------------------------------
+// S11b — About & team
+//
+// Bios describe each person's role at IntelSol only. Add credentials, prior
+// companies or LinkedIn URLs here once they are confirmed — the component
+// renders a LinkedIn link automatically when `linkedin` is set.
+// ---------------------------------------------------------------------------
+
+export const aboutCopy = {
+  eyebrow: 'About IntelSol',
+  heading: 'Built by engineers who ship',
+  sub: 'IntelSol AI is a small, senior team building AI automation for startups, fintech and B2B SaaS. You work directly with the people who design and build your system — no account managers in between.',
+  principles: [
+    {
+      title: 'Outcomes over demos',
+      body: 'Every build is scoped against a business number — hours saved, leads qualified, tickets resolved — and measured after launch.',
+    },
+    {
+      title: 'Your stack, not ours',
+      body: 'We automate around the CRM, inbox and tools your team already uses instead of asking you to migrate.',
+    },
+    {
+      title: 'Honest about fit',
+      body: "If a workflow doesn't need AI, we'll tell you — and fix the process instead.",
+    },
+  ],
+  teamHeading: 'Leadership',
+} as const;
+
+export type TeamMember = {
+  name: string;
+  role: string;
+  bio: string;
+  photo: string;
+  linkedin?: string;
+};
+
+export const team: readonly TeamMember[] = [
+  {
+    name: 'Abbas Khan',
+    role: 'Founder',
+    bio: 'Sets the direction for IntelSol and works with every client from the first audit through launch, keeping each build tied to the outcome it was scoped for.',
+    photo: '/images/team/abbas-khan.jpg',
+  },
+  {
+    name: 'Shahzaib Ghafoor',
+    role: 'CTO',
+    bio: 'Leads engineering and architecture — the agents, integrations and infrastructure behind every system IntelSol ships.',
+    photo: '/images/team/shahzaib-ghafoor.jpg',
+  },
+];
 
 // ---------------------------------------------------------------------------
 // S12 — Contact
